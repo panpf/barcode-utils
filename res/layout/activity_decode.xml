@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent">
+    <SurfaceView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/surface_decode"/>
+    
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:baselineAligned="false">
+        <!-- 功能区 -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:background="#70000000" android:gravity="right" android:padding="16dp">
+       	    <!-- 闪光灯控制按钮 -->
+       	    <ToggleButton 
+       	        android:layout_width="wrap_content" 
+       	        android:layout_height="wrap_content"
+       	        android:id="@+id/checkBox_decode_flash"
+       	        android:button="@null"
+       	        android:drawableLeft="@drawable/selector_button_flash"
+       	        android:drawablePadding="6dp"
+       	        android:textOn="打开"
+       	        android:textOff="关闭"
+       	        android:checked="false"
+       	        android:background="@drawable/button_flashlight_normal"/>
+        </LinearLayout>
+        
+        <!-- 扫描框区 -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="0.9">
+            <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="#70000000"/>
+            <me.xiaopan.barcodescanner.ScanningAreaView android:id="@+id/scanningArea_decode" android:layout_width="0dp" android:layout_height="match_parent" android:background="@drawable/shape_scan_frame" android:layout_weight="4" />
+            <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="#70000000"/>
+        </LinearLayout>
+        
+        <!-- 提示区 -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:padding="16dp" android:background="#70000000" android:gravity="center">
+            <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:id="@+id/text_decode_hint" android:textSize="15sp" android:textColor="#FFFFFFFF" android:gravity="center" android:text="请将条码置于扫描框内"/> 
+        	<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+        	    <Button android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="生成二维码" android:layout_marginRight="8dp" android:id="@+id/button_decode_createQRCode"/>
+        	    <Button android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="图片解码" android:id="@+id/button_decode_imageDecode"/>
+        	</LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

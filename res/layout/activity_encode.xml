@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#ffffff">
+	<LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="16dp">
+		<EditText android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:textColor="#000000" android:gravity="top|left" android:id="@+id/edit_encode_content"/>
+		<Button android:layout_width="match_parent" android:layout_height="wrap_content" android:text="生成" android:layout_marginTop="16dp" android:layout_marginBottom="16dp" android:id="@+id/button_encode_create"/>
+		<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:id="@+id/image_encode_qrcode"/>
+	</LinearLayout>
+</ScrollView>
