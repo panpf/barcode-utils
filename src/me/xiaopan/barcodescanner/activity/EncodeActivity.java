@@ -5,8 +5,8 @@ import java.io.FileOutputStream;
 import java.util.EnumMap;
 import java.util.Map;
 
+import me.xiaopan.barcodescanner.EncodeUtils;
 import me.xiaopan.barcodescanner.R;
-import me.xiaopan.barcodescanner.Utils;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -56,7 +56,7 @@ public class EncodeActivity extends Activity{
 						hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
 						hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
 						
-						qrcodeBitmap = Utils.bitMatrixToBitmap(new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, 300, 300, hints));
+						qrcodeBitmap = EncodeUtils.bitMatrixToBitmap(new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, 300, 300, hints));
 						icBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher, null);
 						int left = (qrcodeBitmap.getWidth() - icBitmap.getWidth())/2;
 						int top = (qrcodeBitmap.getHeight() - icBitmap.getHeight())/2;

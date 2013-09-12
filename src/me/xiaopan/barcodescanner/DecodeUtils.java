@@ -2,13 +2,10 @@ package me.xiaopan.barcodescanner;
 
 import java.util.Map;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.view.Display;
-import android.view.WindowManager;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -19,35 +16,12 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
-import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 
-public class Utils {
-	private static final int WHITE = 0xFFFFFFFF;
-	private static final int BLACK = 0xFF000000;
-	
-	/**
-	 * 将BitMatrix格式的源数据转换为Bitmap
-	 * @param bitMatrix
-	 * @return
-	 */
-	public static Bitmap bitMatrixToBitmap(BitMatrix bitMatrix) {
-		int width = bitMatrix.getWidth();
-		int height = bitMatrix.getHeight();
-		int[] pixels = new int[width * height];
-		
-		for (int y = 0; y < height; y++) {
-			int offset = y * width;
-			for (int x = 0; x < width; x++) {
-				pixels[offset + x] = bitMatrix.get(x, y) ? BLACK : WHITE;
-			}
-		}
-
-		Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-		bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-		return bitmap;
-	}
-	
+/**
+ * 解码工具箱
+ */
+public class DecodeUtils {
 	/**
 	 * 解码Bitmap
 	 * @param bitmap 要解码的Bitmap
@@ -213,33 +187,6 @@ public class Utils {
 	private static void drawLine(Canvas canvas, Paint paint, ResultPoint a, ResultPoint b, float scaleFactor) {
 		if (a != null && b != null) {
 			canvas.drawLine(scaleFactor * a.getX(), scaleFactor * a.getY(), scaleFactor * b.getX(), scaleFactor * b.getY(), paint);
-		}
-	}
-	
-	/**
-	 * 获取当前屏幕的尺寸
-	 * @param context
-	 * @return
-	 */
-	public static ScreenSize getScreenSize(Context context){
-		WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-		Display display = windowManager.getDefaultDisplay();
-		ScreenSize size = new ScreenSize(display.getWidth(), display.getHeight());
-		return size;
-	}
-	
-	/**
-	 * 屏幕尺寸
-	 */
-	public static class ScreenSize {
-		public int width;	
-		public int height;
-		
-		public ScreenSize() {}
-		
-		public ScreenSize(int width, int height){
-			this.width = width;
-			this.height = height;
 		}
 	}
 }

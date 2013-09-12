@@ -3,10 +3,10 @@ package me.xiaopan.barcodescanner.activity;
 import me.xiaopan.barcodescanner.CameraManager;
 import me.xiaopan.barcodescanner.CameraUtils;
 import me.xiaopan.barcodescanner.DecodeListener;
+import me.xiaopan.barcodescanner.DecodeUtils;
 import me.xiaopan.barcodescanner.Decoder;
 import me.xiaopan.barcodescanner.R;
 import me.xiaopan.barcodescanner.ScanningAreaView;
-import me.xiaopan.barcodescanner.Utils;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -199,7 +199,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
 		Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		bitmap.recycle();
-		Utils.drawResultPoints(newBitmap, scaleFactor, result, getResources().getColor(R.color.result_points));
+		DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, getResources().getColor(R.color.result_points));
 		scanningAreaView.drawResultBitmap(newBitmap);
 		hintText.setText(result.getText());
 		getIntent().putExtra(RETURN_BARCODE_CONTENT, result.getText());
@@ -315,7 +315,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
                     }
                     if(imageFilePath != null && !"".equals(imageFilePath.trim())){
                     	try {
-							Result result = Utils.decodeFile(imageFilePath);
+							Result result = DecodeUtils.decodeFile(imageFilePath);
 							if(result != null){
 								hintText.setText(result.getText());
 							}else{

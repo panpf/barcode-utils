@@ -311,7 +311,7 @@ public class CameraManager implements SurfaceHolder.Callback, Camera.AutoFocusCa
 						setDisplayOrientation(CameraUtils.getOptimalDisplayOrientationByWindowDisplayRotation(activity, getCurrentCameraId()));
 					}else{
 						//如果是当前竖屏就将预览角度顺时针旋转90度
-						if (!WindowUtils.isLandscape(activity)) {
+						if (!GeneralUtils.isLandscape(activity)) {
 							setDisplayOrientation(90);
 						}
 					}

@@ -20,7 +20,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import me.xiaopan.barcodescanner.Utils.ScreenSize;
+import me.xiaopan.barcodescanner.GeneralUtils.ScreenSize;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -44,7 +44,7 @@ public class CameraUtils {
 		Camera.Size optimalSize = null;
 		List<Camera.Size> supportedPreviewSizes = camera.getParameters().getSupportedPreviewSizes();
 		if (supportedPreviewSizes != null && supportedPreviewSizes.size() > 0){
-			ScreenSize screenSize = Utils.getScreenSize(context);
+			ScreenSize screenSize = GeneralUtils.getScreenSize(context);
 			final double ASPECT_TOLERANCE = 0.1;
 			double minDiff = Double.MAX_VALUE;
 			
@@ -84,7 +84,7 @@ public class CameraUtils {
 	 * @return
 	 */
 	public static Camera.Size getBestPreviewAndPictureSize(Context context, Camera camera){
-		ScreenSize screenSize = Utils.getScreenSize(context);
+		ScreenSize screenSize = GeneralUtils.getScreenSize(context);
 		boolean landscape = screenSize.width > screenSize.height;
 		
 		//如果是竖屏就将宽高互换
@@ -162,7 +162,7 @@ public class CameraUtils {
 	 * @param cameraId 相机ID，用于区分是前置摄像头还是后置摄像头，在API级别xiaoyu9d系统下此参数无用
 	 */
 	public static int getOptimalDisplayOrientationByWindowDisplayRotation(Activity activity, int cameraId) {      
-		int degrees = WindowUtils.getDisplayRotation(activity);      
+		int degrees = GeneralUtils.getDisplayRotation(activity);      
 		if(Build.VERSION.SDK_INT >= 9){
 			Camera.CameraInfo info = new Camera.CameraInfo();      
 			Camera.getCameraInfo(cameraId, info);      
@@ -188,7 +188,7 @@ public class CameraUtils {
 	public static void setDisplayOrientationByWindowDisplayRotation(Activity activity, int cameraId, Camera camera) {      
 		Camera.CameraInfo info = new Camera.CameraInfo();      
 		Camera.getCameraInfo(cameraId, info);      
-		int degrees = WindowUtils.getDisplayRotation(activity);      
+		int degrees = GeneralUtils.getDisplayRotation(activity);      
 		int result;
 		if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {          
 			result = (info.orientation + degrees) % 360;          

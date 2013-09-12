@@ -13,6 +13,7 @@ public interface DecodeListener {
 	 * @param scaleFactor
 	 */
 	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactor);
+	
 	/**
 	 * 解码失败
 	 */
