@@ -2,9 +2,15 @@ package me.xiaopan.barcodescanner;
 
 import java.util.Map;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.view.Display;
+import android.view.WindowManager;
 
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.MultiFormatReader;
@@ -12,6 +18,7 @@ import com.google.zxing.NotFoundException;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
+import com.google.zxing.ResultPoint;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 
@@ -165,5 +172,74 @@ public class Utils {
 	 */
 	public static final Result decodeYUV(byte[] yuvImageData, int dataWidth, int dataHeight, int left, int top, int width, int height, boolean reverseHorizontal) throws NotFoundException{
 		return decodeYUV(yuvImageData, dataWidth, dataHeight, left, top, width, height, reverseHorizontal, new MultiFormatReader());
+	}
+	
+	/**
+	 * 绘制关键点
+	 * @param barcodeBitmap A bitmap of the captured image.
+	 * @param scaleFactor amount by which thumbnail was scaled
+	 * @param rawResult The decoded results which contains the points to draw.
+	 * @param color
+	 */
+	public static final void drawResultPoints(Bitmap barcodeBitmap, float scaleFactor, Result rawResult, int color) {
+		ResultPoint[] points = rawResult.getResultPoints();
+		if (points != null && points.length > 0) {
+			Canvas canvas = new Canvas(barcodeBitmap);
+			Paint paint = new Paint();
+			paint.setColor(color);
+			if (points.length == 2) {
+				paint.setStrokeWidth(4.0f);
+				drawLine(canvas, paint, points[0], points[1], scaleFactor);
+			} else if (points.length == 4 && (rawResult.getBarcodeFormat() == BarcodeFormat.UPC_A || rawResult.getBarcodeFormat() == BarcodeFormat.EAN_13)) {
+				drawLine(canvas, paint, points[0], points[1], scaleFactor);
+				drawLine(canvas, paint, points[2], points[3], scaleFactor);
+			} else {
+				paint.setStrokeWidth(10.0f);
+				for (ResultPoint point : points) {
+					canvas.drawPoint(scaleFactor * point.getX(), scaleFactor * point.getY(), paint);
+				}
+			}
+		}
+	}
+
+	/**
+	 * 绘制一条线
+	 * @param canvas
+	 * @param paint
+	 * @param a
+	 * @param b
+	 * @param scaleFactor
+	 */
+	private static void drawLine(Canvas canvas, Paint paint, ResultPoint a, ResultPoint b, float scaleFactor) {
+		if (a != null && b != null) {
+			canvas.drawLine(scaleFactor * a.getX(), scaleFactor * a.getY(), scaleFactor * b.getX(), scaleFactor * b.getY(), paint);
+		}
+	}
+	
+	/**
+	 * 获取当前屏幕的尺寸
+	 * @param context
+	 * @return
+	 */
+	public static ScreenSize getScreenSize(Context context){
+		WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		Display display = windowManager.getDefaultDisplay();
+		ScreenSize size = new ScreenSize(display.getWidth(), display.getHeight());
+		return size;
+	}
+	
+	/**
+	 * 屏幕尺寸
+	 */
+	public static class ScreenSize {
+		public int width;	
+		public int height;
+		
+		public ScreenSize() {}
+		
+		public ScreenSize(int width, int height){
+			this.width = width;
+			this.height = height;
+		}
 	}
 }

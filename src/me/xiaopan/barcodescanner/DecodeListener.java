@@ -10,9 +10,9 @@ public interface DecodeListener {
 	 * 解码成功
 	 * @param result
 	 * @param bitmapByteArray
-	 * @param scaleFactory
+	 * @param scaleFactor
 	 */
-	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactory);
+	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactor);
 	/**
 	 * 解码失败
 	 */

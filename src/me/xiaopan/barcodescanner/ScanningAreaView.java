@@ -104,6 +104,15 @@ public class ScanningAreaView extends View {
 		}
 	}
 	
+	
+	@Override
+	protected void onDetachedFromWindow() {
+		super.onDetachedFromWindow();
+		if(resultBitmap != null && !resultBitmap.isRecycled()){
+			resultBitmap.recycle();
+		}
+	}
+
 	/**
 	 * 在纵向的中间绘制一条不停闪烁的红色激光线，高度为LASER_LINE_HEIGHT
 	 * @param canvas
@@ -199,6 +208,9 @@ public class ScanningAreaView extends View {
 	 * 绘制结果图片
 	 */
 	public void drawResultBitmap(Bitmap barcode) {
+		if(resultBitmap != null && !resultBitmap.isRecycled()){
+			resultBitmap.recycle();
+		}
 		resultBitmap = barcode;
 		invalidate();
 	}

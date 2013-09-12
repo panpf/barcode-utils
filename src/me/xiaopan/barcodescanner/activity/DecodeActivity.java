@@ -1,8 +1,16 @@
-package me.xiaopan.barcodescanner;
+package me.xiaopan.barcodescanner.activity;
 
+import me.xiaopan.barcodescanner.CameraManager;
+import me.xiaopan.barcodescanner.CameraUtils;
+import me.xiaopan.barcodescanner.DecodeListener;
+import me.xiaopan.barcodescanner.Decoder;
+import me.xiaopan.barcodescanner.R;
+import me.xiaopan.barcodescanner.ScanningAreaView;
+import me.xiaopan.barcodescanner.Utils;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.media.AudioManager;
@@ -184,11 +192,15 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	}
 
 	@Override
-	public void onDecodeSuccess(Result result, byte[] barcodeBitmapByteArray, float scaleFactory) {
+	public void onDecodeSuccess(Result result, byte[] barcodeBitmapByteArray, float scaleFactor) {
 		stopDecode();//停止解码
 		playSound();//播放音效
 		playVibrator();//发出震动提示
-		scanningAreaView.drawResultBitmap(BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length));
+		Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
+		Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+		bitmap.recycle();
+		Utils.drawResultPoints(newBitmap, scaleFactor, result, getResources().getColor(R.color.result_points));
+		scanningAreaView.drawResultBitmap(newBitmap);
 		hintText.setText(result.getText());
 		getIntent().putExtra(RETURN_BARCODE_CONTENT, result.getText());
 		setResult(RESULT_OK, getIntent());

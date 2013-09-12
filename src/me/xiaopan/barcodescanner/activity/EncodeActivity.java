@@ -1,10 +1,12 @@
-package me.xiaopan.barcodescanner;
+package me.xiaopan.barcodescanner.activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.EnumMap;
 import java.util.Map;
 
+import me.xiaopan.barcodescanner.R;
+import me.xiaopan.barcodescanner.Utils;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;

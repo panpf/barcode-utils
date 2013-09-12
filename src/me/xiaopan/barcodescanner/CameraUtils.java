@@ -20,12 +20,14 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import me.xiaopan.barcodescanner.Utils.ScreenSize;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.os.Build;
 import android.view.OrientationEventListener;
 
 /**
@@ -42,15 +44,13 @@ public class CameraUtils {
 		Camera.Size optimalSize = null;
 		List<Camera.Size> supportedPreviewSizes = camera.getParameters().getSupportedPreviewSizes();
 		if (supportedPreviewSizes != null && supportedPreviewSizes.size() > 0){
-			Size screenSize = DeviceUtils.getScreenSize(context);
-			int screenWidth = screenSize.getHeight();
-			int screenHeight = screenSize.getWidth();
+			ScreenSize screenSize = Utils.getScreenSize(context);
 			final double ASPECT_TOLERANCE = 0.1;
 			double minDiff = Double.MAX_VALUE;
 			
 			//计算最佳的宽高比例
-			double targetRatio = (double) screenWidth / screenHeight;
-			int targetHeight = screenHeight;
+			double targetRatio = (double) screenSize.width / screenSize.height;
+			int targetHeight = screenSize.height;
 			
 			//视图找到一个宽高和屏幕最接近的尺寸
 			for (Camera.Size size : supportedPreviewSizes) {
@@ -84,14 +84,14 @@ public class CameraUtils {
 	 * @return
 	 */
 	public static Camera.Size getBestPreviewAndPictureSize(Context context, Camera camera){
-		Size screenSize = DeviceUtils.getScreenSize(context);
-		boolean landscape = screenSize.getWidth() > screenSize.getHeight();
+		ScreenSize screenSize = Utils.getScreenSize(context);
+		boolean landscape = screenSize.width > screenSize.height;
 		
 		//如果是竖屏就将宽高互换
 		if(!landscape){
-			screenSize.setWidth(screenSize.getWidth() + screenSize.getHeight());
-			screenSize.setHeight(screenSize.getWidth() - screenSize.getHeight());
-			screenSize.setWidth(screenSize.getWidth() - screenSize.getHeight());
+			screenSize.width = screenSize.width + screenSize.height;
+			screenSize.height = screenSize.width - screenSize.height;
+			screenSize.width = screenSize.width - screenSize.height;
 		}
 		
 		Camera.Parameters cameraParameters = camera.getParameters();
@@ -115,7 +115,7 @@ public class CameraUtils {
 		supportPreviewSizeIterator = supportPreviewSizes.iterator();
 		while(supportPreviewSizeIterator.hasNext()){
 			currentPreviewSize = supportPreviewSizeIterator.next();
-			if(currentPreviewSize.width > screenSize.getWidth() || currentPreviewSize.height > screenSize.getHeight()){
+			if(currentPreviewSize.width > screenSize.width || currentPreviewSize.height > screenSize.height){
 				supportPreviewSizeIterator.remove();
 			}
 		}
@@ -124,7 +124,7 @@ public class CameraUtils {
 		supportPictureSizeIterator = supportPictureSizes.iterator();
 		while(supportPictureSizeIterator.hasNext()){
 			currentPictureSize = supportPictureSizeIterator.next();
-			if(currentPictureSize.width > screenSize.getWidth() || currentPictureSize.height > screenSize.getHeight()){
+			if(currentPictureSize.width > screenSize.width || currentPictureSize.height > screenSize.height){
 				supportPictureSizeIterator.remove();
 			}
 		}
@@ -163,7 +163,7 @@ public class CameraUtils {
 	 */
 	public static int getOptimalDisplayOrientationByWindowDisplayRotation(Activity activity, int cameraId) {      
 		int degrees = WindowUtils.getDisplayRotation(activity);      
-		if(SystemUtils.getAPILevel() >= 9){
+		if(Build.VERSION.SDK_INT >= 9){
 			Camera.CameraInfo info = new Camera.CameraInfo();      
 			Camera.getCameraInfo(cameraId, info);      
 			int result;

@@ -107,13 +107,13 @@ public class Decoder implements DecodeListener{
 	}
 
 	@Override
-	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactory) {
+	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactor) {
 		pause();
 		decodeThread.pause();
 		Message message = decodeHandler.obtainMessage(DecodeHandler.MESSAGE_DECODE_SUCCESS, result);
 		Bundle bundle = new Bundle();
 		bundle.putByteArray(DecodeHandler.BARCODE_BITMAP, bitmapByteArray);
-		bundle.putFloat(DecodeHandler.BARCODE_SCALED_FACTOR, scaleFactory);
+		bundle.putFloat(DecodeHandler.BARCODE_SCALED_FACTOR, scaleFactor);
 		message.setData(bundle);
 		message.sendToTarget();
 	}

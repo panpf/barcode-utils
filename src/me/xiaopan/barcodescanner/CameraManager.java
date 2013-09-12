@@ -22,6 +22,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.os.Build;
 import android.view.SurfaceHolder;
 
 /**
@@ -49,7 +50,7 @@ public class CameraManager implements SurfaceHolder.Callback, Camera.AutoFocusCa
 		this.cameraCallback = cameraCallback;
 		
 		//获取前置和后置摄像头的ID
-		if(SystemUtils.getAPILevel() >= 9){
+		if(Build.VERSION.SDK_INT >= 9){
 			int cameraNumbers = Camera.getNumberOfCameras();
 			CameraInfo cameraInfo = new CameraInfo();
 			for(int w = 0; w < cameraNumbers; w++){
@@ -273,7 +274,7 @@ public class CameraManager implements SurfaceHolder.Callback, Camera.AutoFocusCa
 	public boolean setDisplayOrientation(int displayOrientation){
 		if(camera != null){
 			this.displayOrientation = displayOrientation;
-			if(SystemUtils.getAPILevel() >= 9){
+			if(Build.VERSION.SDK_INT >= 9){
 				camera.setDisplayOrientation(displayOrientation);
 			}else{
 				cameraParameters.setRotation(displayOrientation);
@@ -306,7 +307,7 @@ public class CameraManager implements SurfaceHolder.Callback, Camera.AutoFocusCa
 					camera.setParameters(cameraParameters);
 					
 					//设置预览界面旋转角度
-					if(SystemUtils.getAPILevel() >= 9){
+					if(Build.VERSION.SDK_INT >= 9){
 						setDisplayOrientation(CameraUtils.getOptimalDisplayOrientationByWindowDisplayRotation(activity, getCurrentCameraId()));
 					}else{
 						//如果是当前竖屏就将预览角度顺时针旋转90度
