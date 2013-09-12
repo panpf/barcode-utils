@@ -14,16 +14,14 @@ import com.google.zxing.common.HybridBinarizer;
  * 解码线程
  */
 public class DecodeThread extends Thread{
+	private boolean running;
 	private Decoder decoder;
 	private DecodeListener decodeListener;
-//	private SourceDataHolder sourceDataHolder;
-	private boolean running;
 	private Circle<byte[]> yuvSources;
 	
 	public DecodeThread(Decoder decoder, DecodeListener decodeListener) {
 		this.decoder = decoder;
 		this.decodeListener = decodeListener;
-//		sourceDataHolder = new SourceDataHolder();
 		yuvSources = new Circle<byte[]>(2);
 	}
 	
