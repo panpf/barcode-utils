@@ -148,10 +148,11 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	}
 	
 	@Override
-	public void onInitCamera(Camera camera, Camera.Parameters cameraParameters) {
+	public void onInitCamera(Camera camera) {
 		camera.setPreviewCallback(this);//设置预览回调
 		if(decoder == null){	//如果解码器尚未创建的话，就创建解码器并设置其监听器
-			decoder = new Decoder(getBaseContext(), camera.getParameters(), scanningAreaView);
+			Camera.Size previewSize = camera.getParameters().getPreviewSize();
+			decoder = new Decoder(getBaseContext(), previewSize, scanningAreaView.getRectInPreview(previewSize), null, null);
 			decoder.setResultPointCallback(this);	//设置可疑点回调
 			decoder.setDecodeListener(this);	//设置解码监听器
 		}

@@ -46,7 +46,7 @@ public class DecodeThread extends Thread{
 					
 					/* 解码 */
 					Result decodeResult = null;
-					PlanarYUVLuminanceSource planarYUVLuminanceSource = new PlanarYUVLuminanceSource(yuvSource, previewWidth, previewHeight, decoder.getBarcodeCameraApertureInPreviewRect().left, decoder.getBarcodeCameraApertureInPreviewRect().top, decoder.getBarcodeCameraApertureInPreviewRect().width(), decoder.getBarcodeCameraApertureInPreviewRect().height(), false);
+					PlanarYUVLuminanceSource planarYUVLuminanceSource = new PlanarYUVLuminanceSource(yuvSource, previewWidth, previewHeight, decoder.getScanningAreaRect().left, decoder.getScanningAreaRect().top, decoder.getScanningAreaRect().width(), decoder.getScanningAreaRect().height(), false);
 					try {
 						decodeResult = decoder.getMultiFormatReader().decodeWithState(new BinaryBitmap(new HybridBinarizer(planarYUVLuminanceSource)));
 					} catch (Exception re) {

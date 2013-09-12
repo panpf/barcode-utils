@@ -15,7 +15,8 @@
  */
 package me.xiaopan.barcodescanner;
 
-import java.util.Hashtable;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Vector;
 
 import android.content.Context;
@@ -37,9 +38,8 @@ import com.google.zxing.ResultPointCallback;
  */
 public class Decoder implements DecodeListener{
 	private Camera.Size cameraPreviewSize;	//相机预览尺寸
-	private Rect barcodeCameraApertureInPreviewRect;	//扫描框相对于预览界面的矩形
+	private Rect scanningAreaRect;	//扫描框相对于预览界面的矩形
 	private MultiFormatReader multiFormatReader;	//解码读取器
-	private Vector<BarcodeFormat> decodeFormats;	//支持的编码格式
 	private ResultPointCallback resultPointCallback;	//结果可疑点回调对象
 	private DecodeListener decodeListener;	//解码监听器
 	private DecodeThread decodeThread;	//解码线程
@@ -47,19 +47,31 @@ public class Decoder implements DecodeListener{
 	private boolean isPortrait;	//是否是竖屏
 	private boolean pause;
 	
-	public Decoder(Context context, Camera.Parameters cameraParameters, ScanningAreaView barcodeCameraApertureView){
-		cameraPreviewSize = cameraParameters.getPreviewSize();
-		barcodeCameraApertureInPreviewRect = barcodeCameraApertureView.getRectInPreview(cameraPreviewSize);
+	public Decoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, String charset){
+		this.cameraPreviewSize = cameraPreviewSize;
+		this.scanningAreaRect = scanningAreaRect;
 		isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		
-		// 初始化解码对象
-		Hashtable<DecodeHintType, Object> hints = new Hashtable<DecodeHintType, Object>(3);
-		setDecodeFormats(new Vector<BarcodeFormat>());
-		getDecodeFormats().addAll(DecodeFormatManager.ONE_D_FORMATS);
-		getDecodeFormats().addAll(DecodeFormatManager.QR_CODE_FORMATS);
-		getDecodeFormats().addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
-		hints.put(DecodeHintType.POSSIBLE_FORMATS, getDecodeFormats());
-		hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+		if(hints == null){
+			hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
+		}
+		
+		if(!hints.containsKey(DecodeHintType.POSSIBLE_FORMATS)){
+			Vector<BarcodeFormat> decodeFormats = new Vector<BarcodeFormat>(3);
+			decodeFormats.addAll(DecodeFormatManager.ONE_D_FORMATS);
+			decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);
+			decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
+			hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
+		}
+		
+		if(!hints.containsKey(DecodeHintType.CHARACTER_SET)){
+			if(charset != null && !"".equals(charset.trim())){
+				hints.put(DecodeHintType.CHARACTER_SET, charset);
+			}else{
+				hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+			}
+		}
+		
 		hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK, new ResultPointCallback() {
 			@Override
 			public void foundPossibleResultPoint(ResultPoint arg0) {
@@ -68,6 +80,7 @@ public class Decoder implements DecodeListener{
 				}
 			}
 		});
+		
 		multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(hints);
 		decodeHandler = new DecodeHandler(this);
@@ -123,14 +136,6 @@ public class Decoder implements DecodeListener{
 		decodeHandler.obtainMessage(DecodeHandler.MESSAGE_DECODE_FAILURE).sendToTarget();
 	}
 
-	public Vector<BarcodeFormat> getDecodeFormats() {
-		return decodeFormats;
-	}
-
-	public void setDecodeFormats(Vector<BarcodeFormat> decodeFormats) {
-		this.decodeFormats = decodeFormats;
-	}
-
 	public ResultPointCallback getResultPointCallback() {
 		return resultPointCallback;
 	}
@@ -155,15 +160,6 @@ public class Decoder implements DecodeListener{
 		this.cameraPreviewSize = cameraPreviewSize;
 	}
 
-	public Rect getBarcodeCameraApertureInPreviewRect() {
-		return barcodeCameraApertureInPreviewRect;
-	}
-
-	public void setBarcodeCameraApertureInPreviewRect(
-			Rect barcodeCameraApertureInPreviewRect) {
-		this.barcodeCameraApertureInPreviewRect = barcodeCameraApertureInPreviewRect;
-	}
-
 	public MultiFormatReader getMultiFormatReader() {
 		return multiFormatReader;
 	}
@@ -186,6 +182,22 @@ public class Decoder implements DecodeListener{
 
 	public void setDecodeHandler(DecodeHandler decodeHandler) {
 		this.decodeHandler = decodeHandler;
+	}
+
+	public Rect getScanningAreaRect() {
+		return scanningAreaRect;
+	}
+
+	public void setScanningAreaRect(Rect scanningAreaRect) {
+		this.scanningAreaRect = scanningAreaRect;
+	}
+
+	public DecodeThread getDecodeThread() {
+		return decodeThread;
+	}
+
+	public void setDecodeThread(DecodeThread decodeThread) {
+		this.decodeThread = decodeThread;
 	}
 
 	public boolean isPause() {
