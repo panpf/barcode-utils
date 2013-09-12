@@ -109,6 +109,7 @@ public class Decoder implements DecodeListener{
 	@Override
 	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactory) {
 		pause();
+		decodeThread.pause();
 		Message message = decodeHandler.obtainMessage(DecodeHandler.MESSAGE_DECODE_SUCCESS, result);
 		Bundle bundle = new Bundle();
 		bundle.putByteArray(DecodeHandler.BARCODE_BITMAP, bitmapByteArray);

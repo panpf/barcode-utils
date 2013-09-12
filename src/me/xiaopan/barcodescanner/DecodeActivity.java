@@ -1,11 +1,8 @@
 package me.xiaopan.barcodescanner;
 
-import java.util.Map;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.media.AudioManager;
@@ -27,15 +24,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.NotFoundException;
-import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
-import com.google.zxing.common.HybridBinarizer;
 
 public class DecodeActivity extends Activity implements CameraManager.CameraCallback, Camera.PreviewCallback, ResultPointCallback, DecodeListener {
 	private static final String STATE_FLASH_CHECKED = "STATE_FLASH_CHECKED";
@@ -312,7 +303,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
                     }
                     if(imageFilePath != null && !"".equals(imageFilePath.trim())){
                     	try {
-							Result result = Utils.decode(imageFilePath);
+							Result result = Utils.decodeFile(imageFilePath);
 							if(result != null){
 								hintText.setText(result.getText());
 							}else{
