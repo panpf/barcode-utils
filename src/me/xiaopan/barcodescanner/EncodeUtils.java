@@ -50,7 +50,7 @@ public class EncodeUtils {
 	 * @param width 条码宽度
 	 * @param height 条码高度
 	 * @param hints 选项集
-	 * @param logoBitmap 可以在条码中间显示一个logologo
+	 * @param logoBitmap 可以在条码中间显示一个logo
 	 * @param outFile 输出文件
 	 * @return Bitmap
 	 * @throws Exception

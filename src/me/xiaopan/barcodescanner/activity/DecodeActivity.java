@@ -1,6 +1,7 @@
 package me.xiaopan.barcodescanner.activity;
 
 import me.xiaopan.barcodescanner.CameraManager;
+import me.xiaopan.barcodescanner.CameraOptimalSizeCalculator;
 import me.xiaopan.barcodescanner.CameraUtils;
 import me.xiaopan.barcodescanner.DecodeListener;
 import me.xiaopan.barcodescanner.DecodeUtils;
@@ -149,6 +150,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	
 	@Override
 	public void onInitCamera(Camera camera) {
+		Camera.Parameters parameters = camera.getParameters();
+		new CameraOptimalSizeCalculator(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes(), parameters.getSupportedPictureSizes()).getPreviewAndPictureSize();
 		camera.setPreviewCallback(this);//设置预览回调
 		if(decoder == null){	//如果解码器尚未创建的话，就创建解码器并设置其监听器
 			Camera.Size previewSize = camera.getParameters().getPreviewSize();
