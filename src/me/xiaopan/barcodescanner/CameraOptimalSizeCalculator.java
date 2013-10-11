@@ -18,26 +18,92 @@ import android.util.Log;
  */
 public class CameraOptimalSizeCalculator {
 	private static final String LOG_TAG = "CameraUtils";
-	private int surfaceWidth;
-	private int surfaceHeight;
-	private List<Size> supportPreviewSizes;
-	private List<Size> supportPictureSizes;
+	private boolean proportionPriority = true;
+	private float previewSizeMinWidthProportion = 0.7f;
+	private float pictureSizeMinWidthProportion = 0.7f;
 	
-	public CameraOptimalSizeCalculator(int surfaceWidth, int surfaceHeight, List<Size> supportPreviewSizes, List<Size> supportPictureSizes){
-		this.surfaceWidth = surfaceWidth;
-		this.surfaceHeight = surfaceHeight;
-		this.supportPreviewSizes = supportPreviewSizes;
-		this.supportPictureSizes = supportPictureSizes;
+	@SuppressWarnings("unchecked")
+	public Size getPreviewSize(int surfaceViewWidth, int surfaceViewHeight, List<Size> supportPreviewSizes){
+		/* 现在要计算最佳比例 */
+		if(surfaceViewWidth < surfaceViewHeight){	//如果宽度小于高度就将宽高互换
+			surfaceViewWidth = surfaceViewWidth + surfaceViewHeight;
+			surfaceViewHeight = surfaceViewWidth - surfaceViewHeight;
+			surfaceViewWidth = surfaceViewWidth - surfaceViewHeight;
+		}
+		DecimalFormat decimalFormat = new DecimalFormat("0.00");
+		float optimalProportion = Float.valueOf(decimalFormat.format((float) surfaceViewWidth / (float) surfaceViewHeight));
+		Log.e(LOG_TAG, "最佳尺寸="+optimalProportion+", "+surfaceViewWidth+","+surfaceViewHeight);
+		
+		/* 删除那些小于最小宽度比例的 */
+		removeSmall(supportPreviewSizes, (int) (surfaceViewWidth * previewSizeMinWidthProportion));
+		
+		/* 首先获取预览尺寸集合和输出图片尺寸集合 */
+		List<CameraSize> previewCameraSizes = new ArrayList<CameraSize>(supportPreviewSizes.size());
+		for(Size size2 : supportPreviewSizes){
+			previewCameraSizes.add(new CameraSize(size2));
+		}
+		log(previewCameraSizes, "初始状态：预览");
+		
+		/* 其次排序 */
+		sortByProportion(previewCameraSizes);
+		log(previewCameraSizes, "排序：预览");
+		
+		/* 接下来按比例分组 */
+		Map<Float, List<Size>> previewSizeMap = groupingByProportion(previewCameraSizes);
+		previewCameraSizes.clear();
+		previewCameraSizes = null;
+		logGrouping(previewSizeMap, "按比例分组：预览");
+		
+		/* 按最接近最佳比例排序 */
+		List<Entry<Float, List<Size>>> previewSizeEntrys = new ArrayList<Entry<Float,List<Size>>>(previewSizeMap.entrySet());
+		previewSizeMap.clear();
+		previewSizeMap = null;
+		sortByProportionForEntry(optimalProportion, previewSizeEntrys);
+		logCameraSizeEntry(previewSizeEntrys, "按最接近最佳比例排序分组：预览");
+		
+		/* 按最佳比例一个一个找 */
+		Size optimalSize = null;
+		List<Size> previewSizes = null;
+		for(int w = 0; w < previewSizeEntrys.size(); w++){
+			previewSizes = previewSizeEntrys.get(w).getValue();
+			optimalSize = findSame(previewSizes, surfaceViewWidth, surfaceViewHeight);
+			if(optimalSize != null || proportionPriority){
+				break;
+			}
+		}
+		if(optimalSize == null){	//如果还是没有找到就从最佳比例的尺寸组中取宽度最接近的
+			optimalSize = lookingWidthProximal(previewSizeEntrys.get(0).getValue(), surfaceViewWidth);
+		}
+		if(optimalSize != null){
+			Log.e(LOG_TAG, "结果：预览="+optimalSize.width+","+optimalSize.height);
+		}else{
+			Log.e(LOG_TAG, "结果：没有找到合适的尺寸");
+		}
+		
+		return optimalSize;
 	}
 	
 	/**
 	 * 获取最佳的预览和输出图片尺寸
 	 * @param surfaceView
 	 * @param cameraParameters
-	 * @param proportionPriority 如果为true，最佳比例集合中会先在寻找宽高完全相同的一组，如果找不到就取最接近目标宽高的一组；如果为false，会首先在所有比例集合中寻找宽高完全相同的一组，如果找不到就在最佳比例集合中取最接近目标宽高的一组
-	 * @return
 	 */
-	public Size[] getPreviewAndPictureSize(boolean proportionPriority){
+	@SuppressWarnings("unchecked")
+	public Size[] getPreviewAndPictureSize(int surfaceViewWidth, int surfaceViewHeight, List<Size> supportPreviewSizes, List<Size> supportPictureSizes){
+		/* 现在要计算最佳比例 */
+		if(surfaceViewWidth < surfaceViewHeight){	//如果宽度小于高度就将宽高互换
+			surfaceViewWidth = surfaceViewWidth + surfaceViewHeight;
+			surfaceViewHeight = surfaceViewWidth - surfaceViewHeight;
+			surfaceViewWidth = surfaceViewWidth - surfaceViewHeight;
+		}
+		DecimalFormat decimalFormat = new DecimalFormat("0.00");
+		float optimalProportion = Float.valueOf(decimalFormat.format((float) surfaceViewWidth / (float) surfaceViewHeight));
+		Log.e(LOG_TAG, "最佳尺寸="+optimalProportion+", "+surfaceViewWidth+","+surfaceViewHeight);
+		
+		/* 删除那些小于最小宽度比例的 */
+		removeSmall(supportPreviewSizes, (int) (surfaceViewWidth * previewSizeMinWidthProportion));
+		removeSmall(supportPictureSizes, (int) (surfaceViewWidth * pictureSizeMinWidthProportion));
+
 		/* 首先获取预览尺寸集合和输出图片尺寸集合 */
 		List<CameraSize> previewCameraSizes = new ArrayList<CameraSize>(supportPreviewSizes.size());
 		for(Size size2 : supportPreviewSizes){
@@ -47,38 +113,23 @@ public class CameraOptimalSizeCalculator {
 		for(Size size : supportPictureSizes){
 			pictureCameraSizes.add(new CameraSize(size));
 		}
-		
-		/* 其次排序 */
-		sort(previewCameraSizes, pictureCameraSizes);
-		log(previewCameraSizes, "预览");
-		log(previewCameraSizes, "输出");
+		log(previewCameraSizes, "初始状态：预览");
+		log(pictureCameraSizes, "初始状态：输出");
 		
 		/* 然后去除不相同的 */
 		removalOfDifferent(previewCameraSizes, pictureCameraSizes);
-		log(previewCameraSizes, "预览");
-		log(previewCameraSizes, "输出");
+		log(previewCameraSizes, "删除孤独的：预览");
+		log(pictureCameraSizes, "删除孤独的：输出");
 		
 		/* 接下来按比例分组 */
 		Map<Float, List<Size>> previewSizeMap = groupingByProportion(previewCameraSizes);
 		previewCameraSizes.clear();
 		previewCameraSizes = null;
-		logGrouping(previewSizeMap, "预览");
+		logGrouping(previewSizeMap, "按比例分组：预览");
 		Map<Float, List<Size>> pictureSizeMap = groupingByProportion(pictureCameraSizes);
 		pictureCameraSizes.clear();
 		pictureCameraSizes = null;
-		logGrouping(pictureSizeMap, "输出");
-		
-		/* 现在要计算最佳比例 */
-		int surfaceWidth = this.surfaceWidth;
-		int surfaceHeight = this.surfaceHeight;
-		if(surfaceWidth < surfaceHeight){	//如果宽度小于高度就将宽高互换
-			surfaceWidth = surfaceWidth + surfaceHeight;
-			surfaceHeight = surfaceWidth - surfaceHeight;
-			surfaceWidth = surfaceWidth - surfaceHeight;
-		}
-		DecimalFormat decimalFormat = new DecimalFormat("0.00");
-		float optimalProportion = Float.valueOf(decimalFormat.format((float) surfaceWidth / (float) surfaceHeight));
-		Log.e(LOG_TAG, "最佳尺寸="+optimalProportion+", "+surfaceWidth+","+surfaceHeight);
+		logGrouping(pictureSizeMap, "按比例分组：输出");
 		
 		/* 按最接近最佳比例排序 */
 		List<Entry<Float, List<Size>>> previewSizeEntrys = new ArrayList<Entry<Float,List<Size>>>(previewSizeMap.entrySet());
@@ -87,54 +138,41 @@ public class CameraOptimalSizeCalculator {
 		List<Entry<Float, List<Size>>> pictureSizeEntrys = new ArrayList<Entry<Float,List<Size>>>(pictureSizeMap.entrySet());
 		pictureSizeMap.clear();
 		pictureSizeMap = null;
-		sort2(previewSizeEntrys, pictureSizeEntrys, optimalProportion);
-		logCameraSizeEntry(previewSizeEntrys, "预览");
-		logCameraSizeEntry(pictureSizeEntrys, "输出");
+		sortByProportionForEntry(optimalProportion, previewSizeEntrys, pictureSizeEntrys);
+		logCameraSizeEntry(previewSizeEntrys, "按最接近最佳比例排序分组：预览");
+		logCameraSizeEntry(pictureSizeEntrys, "按最接近最佳比例排序分组：输出");
 		
 		/* 按最佳比例一个一个找 */
 		Size[] optimalSizes = null;
 		List<Size> previewSizes = null;
 		List<Size> pictureSizes = null;
-		if(proportionPriority){
-			previewSizes = previewSizeEntrys.get(0).getValue();
-			pictureSizes = pictureSizeEntrys.get(0).getValue();
-			optimalSizes = tryLookingSame(previewSizes, pictureSizes, surfaceWidth);
-			if(optimalSizes == null){
-				optimalSizes = tryLookingWidthProximal(previewSizes, pictureSizes, surfaceWidth);
-			}
-		}else{
-			for(int w = 0; w < previewSizeEntrys.size(); w++){
-				previewSizes = previewSizeEntrys.get(w).getValue();
-				pictureSizes = pictureSizeEntrys.get(w).getValue();
-				optimalSizes = tryLookingSame(previewSizes, pictureSizes, surfaceWidth);
-				if(optimalSizes != null){
-					break;
-				}
-			}
-			if(optimalSizes == null){
-				optimalSizes = tryLookingWidthProximal(previewSizeEntrys.get(0).getValue(), pictureSizeEntrys.get(0).getValue(), surfaceWidth);
+		for(int w = 0; w < previewSizeEntrys.size(); w++){
+			previewSizes = previewSizeEntrys.get(w).getValue();
+			pictureSizes = pictureSizeEntrys.get(w).getValue();
+			optimalSizes = tryLookingSame(previewSizes, pictureSizes, surfaceViewWidth);	//尝试寻找相同尺寸的一组
+			if(optimalSizes != null || proportionPriority){
+				break;
 			}
 		}
-		
+		if(optimalSizes == null){//如果还是没有找到就从最佳比例的尺寸组中取宽度最接近的一组
+			optimalSizes = tryLookingWidthProximal(previewSizeEntrys.get(0).getValue(), pictureSizeEntrys.get(0).getValue(), surfaceViewWidth);
+		}
 		logResult(optimalSizes);
+		
 		return optimalSizes;
-	}
-	
-	public Size[] getPreviewAndPictureSize(){
-		return getPreviewAndPictureSize(true);
 	}
 	
 	/**
 	 * 视图按宽度最接近的原则查找出最佳的尺寸
 	 * @param previewSizes
 	 * @param pictureSizes
-	 * @param surfaceWidth
+	 * @param surfaceViewWidth
 	 * @return
 	 */
-	private Size[] tryLookingWidthProximal(List<Size> previewSizes, List<Size> pictureSizes, int surfaceWidth){
+	private Size[] tryLookingWidthProximal(List<Size> previewSizes, List<Size> pictureSizes, int surfaceViewWidth){
 		Size[] optimalSizes = new Size[2];
-		optimalSizes[0] = lookingWidthProximal(previewSizes, surfaceWidth);
-		optimalSizes[1] = lookingWidthProximal(pictureSizes, surfaceWidth);
+		optimalSizes[0] = lookingWidthProximal(previewSizes, surfaceViewWidth);
+		optimalSizes[1] = lookingWidthProximal(pictureSizes, surfaceViewWidth);
 		return optimalSizes;
 	}
 	
@@ -142,17 +180,17 @@ public class CameraOptimalSizeCalculator {
 	 * 视图按相同的原则查找出最佳的尺寸
 	 * @param previewSizes
 	 * @param pictureSizes
-	 * @param surfaceWidth
+	 * @param surfaceViewWidth
 	 * @return
 	 */
-	private Size[] tryLookingSame(List<Size> previewSizes, List<Size> pictureSizes, int surfaceWidth){
-		List<Size> sames = lookingSame(previewSizes, pictureSizes, surfaceWidth);	//查找出所有相同的
+	private Size[] tryLookingSame(List<Size> previewSizes, List<Size> pictureSizes, int surfaceViewWidth){
+		List<Size> sames = lookingSame(previewSizes, pictureSizes, surfaceViewWidth);	//查找出所有相同的
 		logSame(sames);
 		if(sames != null){	//如果存在相同的
 			Size[] optimalSizes = new Size[2];
 			Size optimalSize = null;
 			if(sames.size() > 1){	//如果相同的还不止一个，就查找出最接近的
-				optimalSize = lookingWidthProximal(sames, surfaceWidth);
+				optimalSize = lookingWidthProximal(sames, surfaceViewWidth);
 				logSame(sames);
 			}else{
 				optimalSize = sames.get(0);
@@ -171,10 +209,10 @@ public class CameraOptimalSizeCalculator {
 	 * @param cameraSizes2
 	 * @return 
 	 */
-	private List<Size> lookingSame(List<Size> cameraSizes1, List<Size> cameraSizes2, int surfaceWidth){
+	private List<Size> lookingSame(List<Size> cameraSizes1, List<Size> cameraSizes2, int surfaceViewWidth){
 		List<Size> sames = null;
 		for(Size size : cameraSizes1){
-			if(exist(size, cameraSizes2) && size.width > surfaceWidth * 0.75){
+			if(exist(size, cameraSizes2)){
 				if(sames == null){
 					sames = new ArrayList<Size>();
 				}
@@ -187,50 +225,56 @@ public class CameraOptimalSizeCalculator {
 	/**
 	 * 查找宽度最接近的
 	 * @param cameraSizes
-	 * @param surfaceWidth
+	 * @param surfaceViewWidth
 	 * @return
 	 */
-	private Size lookingWidthProximal(List<Size> cameraSizes, final int surfaceWidth){
+	private Size lookingWidthProximal(List<Size> cameraSizes, final int surfaceViewWidth){
 		Collections.sort(cameraSizes, new Comparator<Size>() {
 			@Override
 			public int compare(Size lhs, Size rhs) {
-				return (Math.abs(lhs.width - surfaceWidth)) - Math.abs((rhs.width - surfaceWidth));
+				return (Math.abs(lhs.width - surfaceViewWidth)) - Math.abs((rhs.width - surfaceViewWidth));
 			}
 		});
 		return cameraSizes.get(0);
 	}
 	
 	/**
-	 * 按最接近最佳比例排序
+	 * 给实体按最接近最佳比例排序
 	 * @param cameraSizeEntrys
 	 * @param cameraSizeEntrys2
 	 * @param optimalProportion
 	 */
-	private void sort2(List<Entry<Float, List<Size>>> cameraSizeEntrys, List<Entry<Float, List<Size>>> cameraSizeEntrys2, final float optimalProportion){
+	private void sortByProportionForEntry(final float optimalProportion, List<Entry<Float, List<Size>>>... cameraSizeEntrysList){
 		Comparator<Entry<Float, List<Size>>> comparator = new Comparator<Entry<Float, List<Size>>>() {
 			@Override
 			public int compare(Entry<Float, List<Size>> lhs, Entry<Float, List<Size>> rhs) {
-				return (int) (((((float) lhs.getKey() - optimalProportion) * 100) - (((float) rhs.getKey() - optimalProportion) * 100))) * -1;
+				int result = (int) (((Math.abs((lhs.getKey() - optimalProportion)) * 100) - (Math.abs((rhs.getKey() - optimalProportion)) * 100)));
+				if(result == 0){
+					result = (int) ((lhs.getKey() - rhs.getKey()) * 100) * -1;
+				}
+				return result;
 			}
 		};
-		Collections.sort(cameraSizeEntrys, comparator);
-		Collections.sort(cameraSizeEntrys2, comparator);
+		for(List<Entry<Float, List<Size>>> entry : cameraSizeEntrysList){
+			Collections.sort(entry, comparator);
+		}
 	}
 	
 	/**
-	 * 排序
+	 * 按比例排序，最接近最佳比例的在最前面
 	 * @param cameraSizes
 	 * @param cameraSizes2
 	 */
-	private void sort(List<CameraSize> cameraSizes, List<CameraSize> cameraSizes2){
+	private void sortByProportion(List<CameraSize>... cameraSizes){
 		Comparator<CameraSize> comparator = new Comparator<CameraSize>() {
 			@Override
 			public int compare(CameraSize lhs, CameraSize rhs) {
 				return (int) ((lhs.proportion * 100 - rhs.proportion * 100) * -1);
 			}
 		};
-		Collections.sort(cameraSizes, comparator);
-		Collections.sort(cameraSizes2, comparator);
+		for(List<CameraSize> cameraSize : cameraSizes){
+			Collections.sort(cameraSize, comparator);
+		}
 	}
 	
 	/**
@@ -363,6 +407,25 @@ public class CameraOptimalSizeCalculator {
 		return false;
 	}
 	
+	private Size findSame(List<Size> cameraSizes, int surfaceViewWidth, int surfaceViewHeight){
+		for(Size tempSize : cameraSizes){
+			if(tempSize.width == surfaceViewWidth && tempSize.height == surfaceViewHeight){
+				return tempSize;
+			}
+		}
+		return null;
+	}
+	
+	private void removeSmall(List<Size> cameraSizes, int minWidth){
+		Iterator<Size> iterator = cameraSizes.iterator();
+		while(iterator.hasNext()){
+			Size size = iterator.next();
+			if(size.width < minWidth){
+				iterator.remove();
+			}
+		}
+	}
+	
 	private class CameraSize{
 		private Size size;
 		private float proportion;
@@ -371,5 +434,35 @@ public class CameraOptimalSizeCalculator {
 			this.size = size;
 			proportion = Float.valueOf(new DecimalFormat("0.00").format((float) size.width / (float) size.height));
 		}
+	}
+
+	/**
+	 * @return 如果为true，最佳比例集合中会先在寻找宽高完全相同的一组，如果找不到就取最接近目标宽高的一组；如果为false，会首先在所有比例集合中寻找宽高完全相同的一组，如果找不到就在最佳比例集合中取最接近目标宽高的一组
+	 */
+	public boolean isProportionPriority() {
+		return proportionPriority;
+	}
+
+	/**
+	 * @param proportionPriority 如果为true，最佳比例集合中会先在寻找宽高完全相同的一组，如果找不到就取最接近目标宽高的一组；如果为false，会首先在所有比例集合中寻找宽高完全相同的一组，如果找不到就在最佳比例集合中取最接近目标宽高的一组
+	 */
+	public void setProportionPriority(boolean proportionPriority) {
+		this.proportionPriority = proportionPriority;
+	}
+
+	public float getPreviewSizeMinWidthProportion() {
+		return previewSizeMinWidthProportion;
+	}
+
+	public void setPreviewSizeMinWidthProportion(float previewSizeMinWidthProportion) {
+		this.previewSizeMinWidthProportion = previewSizeMinWidthProportion;
+	}
+
+	public float getPictureSizeMinWidthProportion() {
+		return pictureSizeMinWidthProportion;
+	}
+
+	public void setPictureSizeMinWidthProportion(float pictureSizeMinWidthProportion) {
+		this.pictureSizeMinWidthProportion = pictureSizeMinWidthProportion;
 	}
 }

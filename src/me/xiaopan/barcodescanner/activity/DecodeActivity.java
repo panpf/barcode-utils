@@ -151,7 +151,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	@Override
 	public void onInitCamera(Camera camera) {
 		Camera.Parameters parameters = camera.getParameters();
-		new CameraOptimalSizeCalculator(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes(), parameters.getSupportedPictureSizes()).getPreviewAndPictureSize();
+//		new CameraOptimalSizeCalculator().getPreviewAndPictureSize(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes(), parameters.getSupportedPictureSizes());
+		new CameraOptimalSizeCalculator().getPreviewSize(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes());
 		camera.setPreviewCallback(this);//设置预览回调
 		if(decoder == null){	//如果解码器尚未创建的话，就创建解码器并设置其监听器
 			Camera.Size previewSize = camera.getParameters().getPreviewSize();
