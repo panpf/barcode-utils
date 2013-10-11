@@ -18,6 +18,7 @@ package me.xiaopan.barcodescanner;
 import java.util.Collection;
 import java.util.HashSet;
 
+import me.xiaopan.easy.android.util.CameraUtils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -191,7 +192,7 @@ public class ScanningAreaView extends View {
 			Display display = windowManager.getDefaultDisplay();
 			Rect goRect = new Rect();
 			getGlobalVisibleRect(goRect);
-			rectInPreview= CameraUtils.computeCameraApertureInPictureRect(getContext(), display.getWidth(), display.getHeight(), goRect, cameraPictureSize);
+			rectInPreview= CameraUtils.computeRect(getContext(), display.getWidth(), display.getHeight(), goRect, cameraPictureSize);
 		}
 		return rectInPreview;
 	}

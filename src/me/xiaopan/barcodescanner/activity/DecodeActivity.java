@@ -1,18 +1,19 @@
 package me.xiaopan.barcodescanner.activity;
 
-import me.xiaopan.barcodescanner.CameraManager;
-import me.xiaopan.barcodescanner.CameraOptimalSizeCalculator;
-import me.xiaopan.barcodescanner.CameraUtils;
 import me.xiaopan.barcodescanner.DecodeListener;
 import me.xiaopan.barcodescanner.DecodeUtils;
 import me.xiaopan.barcodescanner.Decoder;
 import me.xiaopan.barcodescanner.R;
 import me.xiaopan.barcodescanner.ScanningAreaView;
+import me.xiaopan.easy.android.util.CameraManager;
+import me.xiaopan.easy.android.util.CameraOptimalSizeCalculator;
+import me.xiaopan.easy.android.util.CameraUtils;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -156,7 +157,19 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		camera.setPreviewCallback(this);//设置预览回调
 		if(decoder == null){	//如果解码器尚未创建的话，就创建解码器并设置其监听器
 			Camera.Size previewSize = camera.getParameters().getPreviewSize();
-			decoder = new Decoder(getBaseContext(), previewSize, scanningAreaView.getRectInPreview(previewSize), null, null);
+			
+			Rect areaRect = new Rect();
+			scanningAreaView.getGlobalVisibleRect(areaRect);
+			
+			Rect surfaceViewRect = new Rect();
+			surfaceView.getGlobalVisibleRect(areaRect);
+			
+			Rect finalRect = new Rect(areaRect.left - surfaceViewRect.left, areaRect.top - surfaceViewRect.top, areaRect.right - surfaceViewRect.left, areaRect.bottom - surfaceViewRect.top);
+			
+			Rect rectInPreview= CameraUtils.computeRect(getBaseContext(), surfaceView.getWidth(), surfaceView.getHeight(), finalRect, parameters.getPreviewSize());
+			
+//			decoder = new Decoder(getBaseContext(), previewSize, scanningAreaView.getRectInPreview(previewSize), null, null);
+			decoder = new Decoder(getBaseContext(), previewSize, rectInPreview, null, null);
 			decoder.setResultPointCallback(this);	//设置可疑点回调
 			decoder.setDecodeListener(this);	//设置解码监听器
 		}

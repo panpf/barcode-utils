@@ -2,6 +2,8 @@ package me.xiaopan.barcodescanner;
 
 import java.io.ByteArrayOutputStream;
 
+import me.xiaopan.easy.android.util.CameraUtils;
+import me.xiaopan.easy.java.util.Circle;
 import android.graphics.Bitmap;
 import android.util.Log;
 
