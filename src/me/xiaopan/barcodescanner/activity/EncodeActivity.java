@@ -39,8 +39,7 @@ public class EncodeActivity extends Activity{
 				String content = contentEdit.getEditableText().toString().trim();
 				if(!TextUtils.isEmpty(content)){
 					try {
-						qrcodeImage.setImageBitmap(EncodeUtils.encode(content, BarcodeFormat.QR_CODE, null, 50, 50, null, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher, null), new File(new File(Environment.getExternalStorageDirectory().getPath() + File.separator + getPackageName()).getPath() + File.separator + System.currentTimeMillis() + ".jpeg")));
-//						qrcodeImage.setImageBitmap(EncodeUtils.encode(content, BarcodeFormat.CODE_39, null, 200, 100, null, null, new File(new File(Environment.getExternalStorageDirectory().getPath() + File.separator + getPackageName()).getPath() + File.separator + System.currentTimeMillis() + ".jpeg")));
+						qrcodeImage.setImageBitmap(EncodeUtils.encode(content, BarcodeFormat.QR_CODE, null, 500, 500, null, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher, null), new File(new File(Environment.getExternalStorageDirectory().getPath() + File.separator + getPackageName()).getPath() + File.separator + System.currentTimeMillis() + ".jpeg")));
 					} catch (Exception e) {
 						e.printStackTrace();
 						Toast.makeText(getBaseContext(), "生成失败", Toast.LENGTH_SHORT).show();
