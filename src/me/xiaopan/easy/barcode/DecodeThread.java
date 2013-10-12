@@ -1,4 +1,4 @@
-package me.xiaopan.barcode;
+package me.xiaopan.easy.barcode;
 
 import java.io.ByteArrayOutputStream;
 

@@ -1,10 +1,10 @@
-package me.xiaopan.barcodescanner.activity;
+package test.activity;
 
-import me.xiaopan.barcode.DecodeListener;
-import me.xiaopan.barcode.DecodeUtils;
-import me.xiaopan.barcode.Decoder;
-import me.xiaopan.barcode.ScanAreaView;
-import me.xiaopan.barcodescanner.R;
+import me.xiaopan.easy.barcode.DecodeListener;
+import me.xiaopan.easy.barcode.DecodeUtils;
+import me.xiaopan.easy.barcode.Decoder;
+import me.xiaopan.easy.barcode.R;
+import me.xiaopan.easy.barcode.ScanAreaView;
 import me.xiaopan.easy.android.util.CameraManager;
 import me.xiaopan.easy.android.util.CameraOptimalSizeCalculator;
 import me.xiaopan.easy.android.util.CameraUtils;

@@ -1,9 +1,9 @@
-package me.xiaopan.barcodescanner.activity;
+package test.activity;
 
 import java.io.File;
 
-import me.xiaopan.barcode.EncodeUtils;
-import me.xiaopan.barcodescanner.R;
+import me.xiaopan.easy.barcode.EncodeUtils;
+import me.xiaopan.easy.barcode.R;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
