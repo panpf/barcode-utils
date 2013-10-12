@@ -15,8 +15,8 @@
  */
 package me.xiaopan.barcode;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -34,6 +34,7 @@ import com.google.zxing.ResultPoint;
  * 扫描区域视图
  */
 public class ScanAreaView extends View implements Runnable{
+	private static final int MAX_RESULT_POINTS = 20;
 	private static final int OPAQUE = 0xFF;	//不透明
 	private int width;	//扫描框的宽
 	private int height;	//扫描框的高
@@ -57,8 +58,8 @@ public class ScanAreaView extends View implements Runnable{
 	private Paint paint;	//画笔
 	private Bitmap resultBitmap;	//扫描结果图片
 	private Handler handler;	//用来刷新的Handler
-	private Collection<ResultPoint> possibleResultPoints;	//当前可疑点集合
-	private Collection<ResultPoint> lastPossibleResultPoints;	//上次可疑点集合
+	private List<ResultPoint> possibleResultPoints;	//当前可疑点集合
+	private List<ResultPoint> lastPossibleResultPoints;	//上次可疑点集合
 	
 	public ScanAreaView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -78,7 +79,7 @@ public class ScanAreaView extends View implements Runnable{
 	private void init(){
 		paint = new Paint();
 		handler = new Handler();
-		possibleResultPoints = new HashSet<ResultPoint>(5);
+		possibleResultPoints = new ArrayList<ResultPoint>(5);
 	}
 
 	@SuppressLint("DrawAllocation")
@@ -113,24 +114,28 @@ public class ScanAreaView extends View implements Runnable{
 			}
 			
 			/* 绘制可疑点 */
-			Collection<ResultPoint> currentPossible = possibleResultPoints;
-			Collection<ResultPoint> currentLast = lastPossibleResultPoints;
+			List<ResultPoint> currentPossible = possibleResultPoints;
+			List<ResultPoint> currentLast = lastPossibleResultPoints;
 			paint.setColor(resultPointColor);
 			paint.setShader(null);
 			if (currentPossible.isEmpty()) {
 				lastPossibleResultPoints = null;
 			} else {
-				possibleResultPoints = new HashSet<ResultPoint>(5);
+				possibleResultPoints = new ArrayList<ResultPoint>(5);
 				lastPossibleResultPoints = currentPossible;
 				paint.setAlpha(OPAQUE);
-				for (ResultPoint point : currentPossible) {
-					canvas.drawCircle(point.getX(), point.getY(), newResultPointRadius, paint);
+				synchronized (currentPossible) {
+					for (ResultPoint point : currentPossible) {
+						canvas.drawCircle(point.getX(), point.getY(), newResultPointRadius, paint);
+					}
 				}
 			}
 			if (currentLast != null) {
 				paint.setAlpha(OPAQUE / 2);
-				for (ResultPoint point : currentLast) {
-					canvas.drawCircle(point.getX(), point.getY(), oldResultPointRadius, paint);
+				synchronized (currentLast) {
+					for (ResultPoint point : currentLast) {
+						canvas.drawCircle(point.getX(), point.getY(), oldResultPointRadius, paint);
+					}
 				}
 			}
 		}
@@ -149,7 +154,14 @@ public class ScanAreaView extends View implements Runnable{
 	 * @param resultPoint
 	 */
 	public void addResultPoint(ResultPoint resultPoint) {
-		possibleResultPoints.add(resultPoint);
+		List<ResultPoint> resultPoints = possibleResultPoints;
+	    synchronized (resultPoints) {
+	      resultPoints.add(resultPoint);
+	      int size = resultPoints.size();
+	      if (size > MAX_RESULT_POINTS) {
+	        resultPoints.subList(0, size - MAX_RESULT_POINTS / 2).clear();
+	      }
+	    }
 	}
 	
 	/**
