@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.util.EnumMap;
 import java.util.Map;
 
+import me.xiaopan.easy.android.util.BitmapUtils;
+
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
@@ -50,7 +52,7 @@ public class EncodeUtils {
 	 * @param width 条码宽度
 	 * @param height 条码高度
 	 * @param hints 选项集
-	 * @param logoBitmap 可以在条码中间显示一个logo
+	 * @param logoBitmap 可以在条码中间显示一个logo，如果logo的大小超过了条码宽度的30%那么就会将logo缩小至条码宽度的30%
 	 * @param outFile 输出文件
 	 * @return Bitmap
 	 * @throws Exception
@@ -62,15 +64,29 @@ public class EncodeUtils {
 				hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
 			}
 			
-			//根据Logo的大小同输出二维码的宽高设置合适的容错率
+			//根据Logo的大小同输出二维码的宽高设置合适的容错率，如果logo的大小已经超出了最大容错率的限制就将logo缩小至最大容错率允许的大小
 			if(logoBitmap != null){
 				int logoWidth = logoBitmap.getWidth();
 				int logoHeight = logoBitmap.getHeight();
+				ErrorCorrectionLevel errorCorrectionLevel = null;
 				if(logoWidth > logoHeight){
-					hints.put(EncodeHintType.ERROR_CORRECTION, getErrorCorrectionLevel((float) logoWidth/(float) width));
+					errorCorrectionLevel = getErrorCorrectionLevel((float) logoWidth/(float) width);
+					if(errorCorrectionLevel == null){
+						errorCorrectionLevel = ErrorCorrectionLevel.H;
+						int maxWidth = (int) (width * 0.3);
+						int newHeight = (int) (logoHeight * ((float) maxWidth / (float) logoWidth));
+						logoBitmap = BitmapUtils.scale(logoBitmap, maxWidth, newHeight);
+					}
 				}else{
-					hints.put(EncodeHintType.ERROR_CORRECTION, getErrorCorrectionLevel((float) logoHeight/(float) height));
+					errorCorrectionLevel = getErrorCorrectionLevel((float) logoHeight/(float) height);
+					if(errorCorrectionLevel == null){
+						errorCorrectionLevel = ErrorCorrectionLevel.H;
+						int maxHeight = (int) (height * 0.3);
+						int newWidth = (int) (logoWidth * ((float) maxHeight / (float) logoHeight));
+						logoBitmap = BitmapUtils.scale(logoBitmap, newWidth, maxHeight);
+					}
 				}
+				hints.put(EncodeHintType.ERROR_CORRECTION, errorCorrectionLevel);
 			}
 			
 			//设置编码方式
@@ -133,8 +149,10 @@ public class EncodeUtils {
 			return ErrorCorrectionLevel.M;
 		}else if(proportion <= 0.25){
 			return ErrorCorrectionLevel.Q;
-		}else{
+		}else if(proportion <= 0.30){
 			return ErrorCorrectionLevel.H;
+		}else{
+			return null;
 		}
 	}
 }

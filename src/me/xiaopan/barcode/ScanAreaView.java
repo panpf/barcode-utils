@@ -39,7 +39,7 @@ public class ScanAreaView extends View implements Runnable{
 	private int width;	//扫描框的宽
 	private int height;	//扫描框的高
 	private int laserLineColor = -65536;	//激光线的颜色，默认为红色
-	private int laserLineSlidePace = 6;	//激光线滑动步伐
+	private int laserLineSlidePace = 7;	//激光线滑动步伐
 	private int laserLineHeight = 4;//激光线高度
 	private int laserLineInSlideAvailableHeight;	//激光线在滑动的过程中扫描框可使用的高度
 	private int laserLineLeft;	//激光线左边距
