@@ -43,7 +43,7 @@ public class Decoder implements DecodeListener{
 	private ResultPointCallback resultPointCallback;	//结果可疑点回调对象
 	private DecodeListener decodeListener;	//解码监听器
 	private DecodeThread decodeThread;	//解码线程
-	private DecodeHandler decodeHandler;	//解码处理器
+	private DecodeMessageHandler decodeHandler;	//解码处理器
 	private boolean isPortrait;	//是否是竖屏
 	private boolean pause;
 	
@@ -83,7 +83,7 @@ public class Decoder implements DecodeListener{
 		
 		multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(hints);
-		decodeHandler = new DecodeHandler(this);
+		decodeHandler = new DecodeMessageHandler(this);
 		decodeThread = new DecodeThread(this, this);
 		decodeThread.start();
 	}
@@ -124,17 +124,17 @@ public class Decoder implements DecodeListener{
 	@Override
 	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactor) {
 		pause();
-		Message message = decodeHandler.obtainMessage(DecodeHandler.MESSAGE_DECODE_SUCCESS, result);
+		Message message = decodeHandler.obtainMessage(DecodeMessageHandler.MESSAGE_WHAT_DECODE_SUCCESS, result);
 		Bundle bundle = new Bundle();
-		bundle.putByteArray(DecodeHandler.BARCODE_BITMAP, bitmapByteArray);
-		bundle.putFloat(DecodeHandler.BARCODE_SCALED_FACTOR, scaleFactor);
+		bundle.putByteArray(DecodeMessageHandler.PARAM_BYTE_ARRAY_BARCODE_BITMAP, bitmapByteArray);
+		bundle.putFloat(DecodeMessageHandler.PARAM_FLOAT_BARCODE_SCALED_FACTOR, scaleFactor);
 		message.setData(bundle);
 		message.sendToTarget();
 	}
 
 	@Override
 	public void onDecodeFailure() {
-		decodeHandler.obtainMessage(DecodeHandler.MESSAGE_DECODE_FAILURE).sendToTarget();
+		decodeHandler.obtainMessage(DecodeMessageHandler.MESSAGE_WHAT_DECODE_FAILURE).sendToTarget();
 	}
 
 	public ResultPointCallback getResultPointCallback() {
@@ -177,11 +177,11 @@ public class Decoder implements DecodeListener{
 		this.isPortrait = isPortrait;
 	}
 
-	public DecodeHandler getDecodeHandler() {
+	public DecodeMessageHandler getDecodeHandler() {
 		return decodeHandler;
 	}
 
-	public void setDecodeHandler(DecodeHandler decodeHandler) {
+	public void setDecodeHandler(DecodeMessageHandler decodeHandler) {
 		this.decodeHandler = decodeHandler;
 	}
 
