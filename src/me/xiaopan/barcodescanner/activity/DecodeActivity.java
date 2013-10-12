@@ -110,8 +110,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		
 		/* 初始化 */
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), this);
-		cameraManager.setFocusIntervalTime(3000);
-		scanAreaView.setStrokeWidth(2);
+		cameraManager.setFocusIntervalTime(1500);
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 	}
@@ -196,7 +195,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	
 	@Override
 	public void foundPossibleResultPoint(ResultPoint arg0) {
-		scanAreaView.addPossibleResultPoint(arg0);
+		scanAreaView.addResultPoint(arg0);
 	}
 
 	@Override
