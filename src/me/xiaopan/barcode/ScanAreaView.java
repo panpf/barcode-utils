@@ -18,6 +18,8 @@ package me.xiaopan.barcode;
 import java.util.Collection;
 import java.util.HashSet;
 
+import me.xiaopan.easy.android.util.AndroidLogger;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -69,7 +71,8 @@ public class ScanAreaView extends View implements Runnable{
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		//初始化
+		AndroidLogger.e("onDraw");
+		/* 初始化 */
 		if(init){
 			init = false;
 			width = getWidth();
@@ -84,90 +87,57 @@ public class ScanAreaView extends View implements Runnable{
 		//如果有结果图片就直接将结果图片绘制到扫描框中
 		if (resultBitmap != null) {
 			paint.setAlpha(OPAQUE);
-			
 			if(rect == null){
 				rect = new Rect(0, 0, getWidth(), getHeight());
 			}
-			
 			canvas.drawBitmap(resultBitmap, null, rect, paint);
 		} else {
-			//绘制激光线
+			/* 绘制激光线 */
+			paint.setColor(getLaserLineColor());	//设置画笔颜色为红色
+			paint.setAlpha(getLaserLineAlphas()[laserLineAlphaIndex]);	//设置透明度（透明度的值根据索引从透明度变换表中取）
+			laserLineAlphaIndex = (laserLineAlphaIndex + 1) % getLaserLineAlphas().length;	//更新激光线透明度索引
 			if(isCloseSlideLaserLineMode()){
-				drawLaserLinerFlicker(canvas);
+				canvas.drawRect(laserLineLeft, laserLineTop, laserLineRight, laserLineBottom, paint);	//绘制激光线
 			}else{
-				drawLaserLinerSlide(canvas);
+				canvas.drawRect(laserLineLeft, laserLineSlideTop, laserLineRight, laserLineSlideTop + laserLineHeight, paint);	//绘制激光线
+				laserLineSlideTop = (laserLineSlideTop + getLaserLineSlidePace()) % laserLineInSlideAvailableHeight;	//更新顶边距
 			}
 			
-			//绘制可疑点
-			drawPossibleResult(canvas);
+			/* 绘制可疑点 */
+			Collection<ResultPoint> currentPossible = possibleResultPoints;
+			Collection<ResultPoint> currentLast = lastPossibleResultPoints;
+			if (currentPossible.isEmpty()) {
+				lastPossibleResultPoints = null;
+			} else {
+				possibleResultPoints = new HashSet<ResultPoint>(5);
+				lastPossibleResultPoints = currentPossible;
+				paint.setAlpha(OPAQUE);
+				paint.setColor(getResultPointColor());
+				for (ResultPoint point : currentPossible) {
+					canvas.drawCircle(point.getX(), point.getY(), getNewResultPointRadius(), paint);
+				}
+			}
+			if (currentLast != null) {
+				paint.setAlpha(OPAQUE / 2);
+				paint.setColor(resultPointColor);
+				for (ResultPoint point : currentLast) {
+					canvas.drawCircle(point.getX(), point.getY(), getLastResultPointRadius(), paint);
+				}
+			}
 		}
 	}
 	
-	
+	@Override
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		super.onLayout(changed, left, top, right, bottom);
+		AndroidLogger.e("onLayout");
+	}
+
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
 		if(resultBitmap != null && !resultBitmap.isRecycled()){
 			resultBitmap.recycle();
-		}
-	}
-
-	/**
-	 * 在纵向的中间绘制一条不停闪烁的红色激光线，高度为LASER_LINE_HEIGHT
-	 * @param canvas
-	 */
-	private void drawLaserLinerFlicker(Canvas canvas){
-		//设置画笔颜色为红色
-		paint.setColor(getLaserLineColor());
-		//设置透明度（透明度的值根据索引从透明度变换表中取）
-		paint.setAlpha(getLaserLineAlphas()[laserLineAlphaIndex]);
-		//更新激光线透明度索引
-		laserLineAlphaIndex = (laserLineAlphaIndex + 1) % getLaserLineAlphas().length;
-		//绘制激光线
-		canvas.drawRect(laserLineLeft, laserLineTop, laserLineRight, laserLineBottom, paint);
-	}
-	
-	/**
-	 * 绘制移动并闪烁的激光线，高度为LASER_LINE_HEIGHT
-	 * @param canvas
-	 */
-	private void drawLaserLinerSlide(Canvas canvas){
-		//设置画笔颜色为红色
-		paint.setColor(getLaserLineColor());
-		//设置透明度（透明度的值根据索引从透明度变换表中取）
-		paint.setAlpha(getLaserLineAlphas()[laserLineAlphaIndex]);
-		//更新激光线透明度索引
-		laserLineAlphaIndex = (laserLineAlphaIndex + 1) % getLaserLineAlphas().length;
-		//绘制激光线
-		canvas.drawRect(laserLineLeft, laserLineSlideTop, laserLineRight, laserLineSlideTop + laserLineHeight, paint);
-		//更新顶边距
-		laserLineSlideTop = (laserLineSlideTop + getLaserLineSlidePace()) % laserLineInSlideAvailableHeight;
-	}
-	
-	/**
-	 * 绘制可疑点
-	 * @param canvas
-	 */
-	private void drawPossibleResult(Canvas canvas){
-		Collection<ResultPoint> currentPossible = possibleResultPoints;
-		Collection<ResultPoint> currentLast = lastPossibleResultPoints;
-		if (currentPossible.isEmpty()) {
-			lastPossibleResultPoints = null;
-		} else {
-			possibleResultPoints = new HashSet<ResultPoint>(5);
-			lastPossibleResultPoints = currentPossible;
-			paint.setAlpha(OPAQUE);
-			paint.setColor(getResultPointColor());
-			for (ResultPoint point : currentPossible) {
-				canvas.drawCircle(point.getX(), point.getY(), getNewResultPointRadius(), paint);
-			}
-		}
-		if (currentLast != null) {
-			paint.setAlpha(OPAQUE / 2);
-			paint.setColor(resultPointColor);
-			for (ResultPoint point : currentLast) {
-				canvas.drawCircle(point.getX(), point.getY(), getLastResultPointRadius(), paint);
-			}
 		}
 	}
 
