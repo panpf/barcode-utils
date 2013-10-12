@@ -1,4 +1,4 @@
-BarcodeScanner
+EasyBarcode
 ==============
 
-BarcodeScanner
+旨在让条码扫描以及生成变的更容易
