@@ -2,7 +2,7 @@ package me.xiaopan.barcodescanner.activity;
 
 import java.io.File;
 
-import me.xiaopan.barcodescanner.EncodeUtils;
+import me.xiaopan.barcode.EncodeUtils;
 import me.xiaopan.barcodescanner.R;
 import android.app.Activity;
 import android.graphics.BitmapFactory;

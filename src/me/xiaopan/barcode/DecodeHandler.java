@@ -1,4 +1,4 @@
-package me.xiaopan.barcodescanner;
+package me.xiaopan.barcode;
 
 import android.os.Bundle;
 import android.os.Handler;

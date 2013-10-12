@@ -1,25 +1,25 @@
 package me.xiaopan.barcodescanner.activity;
 
-import me.xiaopan.barcodescanner.DecodeListener;
-import me.xiaopan.barcodescanner.DecodeUtils;
-import me.xiaopan.barcodescanner.Decoder;
+import me.xiaopan.barcode.DecodeListener;
+import me.xiaopan.barcode.DecodeUtils;
+import me.xiaopan.barcode.Decoder;
+import me.xiaopan.barcode.ScanAreaView;
 import me.xiaopan.barcodescanner.R;
-import me.xiaopan.barcodescanner.ScanningAreaView;
 import me.xiaopan.easy.android.util.CameraManager;
 import me.xiaopan.easy.android.util.CameraOptimalSizeCalculator;
 import me.xiaopan.easy.android.util.CameraUtils;
+import me.xiaopan.easy.android.util.ViewUtils;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Rect;
 import android.hardware.Camera;
+import android.hardware.Camera.Size;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -39,43 +39,45 @@ import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 
 public class DecodeActivity extends Activity implements CameraManager.CameraCallback, Camera.PreviewCallback, ResultPointCallback, DecodeListener {
+	public static final String RETURN_BARCODE_CONTENT = "RETURN_BARCODE_CONTENT";
 	private static final String STATE_FLASH_CHECKED = "STATE_FLASH_CHECKED";
 	private static final int REQUEST_CODE_GET_IMAGE = 46231;
-	public static final String RETURN_BARCODE_CONTENT = "RETURN_BARCODE_CONTENT";
-	private int beepId;//哔哔音效
-	private SurfaceView surfaceView;	//显示画面的视图
-	private ScanningAreaView scanningAreaView;//扫描框（取景器）
-	private Decoder decoder;	//解码器
-	private SoundPool soundPool;//音效池
-	private CameraManager cameraManager;
-	private RefreshScanFrameRunnable refreshScanFrameRunnable;
-	private Handler handler;
-	private TextView hintText;
-	private ToggleButton flashButton;
+	private int beepId;
 	private View createQRCodeButton;
 	private View imageDecodeButton;
+	private Decoder decoder;
+	private TextView hintText;
+	private SoundPool soundPool;
+	private SurfaceView surfaceView;	
+	private ToggleButton flashButton;
+	private ScanAreaView scanAreaView;
+	private CameraManager cameraManager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		/* 设置全屏模式 */
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
 		setContentView(R.layout.activity_decode);
 		surfaceView = (SurfaceView) findViewById(R.id.surface_decode);
-		scanningAreaView = (ScanningAreaView) findViewById(R.id.scanningArea_decode);
+		scanAreaView = (ScanAreaView) findViewById(R.id.scannArea_decode);
 		flashButton = (ToggleButton) findViewById(R.id.checkBox_decode_flash);
 		hintText = (TextView) findViewById(R.id.text_decode_hint);
 		createQRCodeButton = findViewById(R.id.button_decode_createQRCode);
 		imageDecodeButton = findViewById(R.id.button_decode_imageDecode);
 		
-		scanningAreaView.setOnClickListener(new OnClickListener() {
+		//点击扫描区域开始解码
+		scanAreaView.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startDecode();//开始解码
+				startDecode();
 			}
 		});
 		
+		//点击闪光灯按钮切换闪光灯常亮状态
 		flashButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -83,6 +85,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			}
 		});
 		
+		//点击生成二维码按钮启动生成二维码界面
 		createQRCodeButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -90,6 +93,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			}
 		});
 		
+		//点击图片解码按钮打开图库选择图片，选定图片后就会立即对选定的图片解码
 		imageDecodeButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -99,22 +103,15 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			}
 		});
 		
+		//如果是恢复状态就重置闪光灯的按钮的常量状态
 		if(savedInstanceState != null){
 			flashButton.setChecked(savedInstanceState.getBoolean(STATE_FLASH_CHECKED));
 		}
 		
-		//初始化相机管理器
+		/* 初始化 */
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), this);
 		cameraManager.setFocusIntervalTime(3000);
-		
-		//初始化刷新扫描框的处理器
-		handler = new Handler();
-		refreshScanFrameRunnable = new RefreshScanFrameRunnable();
-		
-		//设置扫描框的描边宽度
-		scanningAreaView.setStrokeWidth(2);
-		
-		//初始化音效
+		scanAreaView.setStrokeWidth(2);
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 	}
@@ -137,9 +134,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		cameraManager = null;
 		soundPool.release();
 		soundPool = null;
+		decoder.release();
 		decoder = null;
-		refreshScanFrameRunnable = null;
-		handler = null;
 		super.onDestroy();
 	}
 
@@ -151,27 +147,19 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	
 	@Override
 	public void onInitCamera(Camera camera) {
+		/* 设置预览回调和预览分辨率 */
+		camera.setPreviewCallback(this);
 		Camera.Parameters parameters = camera.getParameters();
-//		new CameraOptimalSizeCalculator().getPreviewAndPictureSize(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes(), parameters.getSupportedPictureSizes());
-		new CameraOptimalSizeCalculator().getPreviewSize(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes());
-		camera.setPreviewCallback(this);//设置预览回调
-		if(decoder == null){	//如果解码器尚未创建的话，就创建解码器并设置其监听器
-			Camera.Size previewSize = camera.getParameters().getPreviewSize();
-			
-			Rect areaRect = new Rect();
-			scanningAreaView.getGlobalVisibleRect(areaRect);
-			
-			Rect surfaceViewRect = new Rect();
-			surfaceView.getGlobalVisibleRect(areaRect);
-			
-			Rect finalRect = new Rect(areaRect.left - surfaceViewRect.left, areaRect.top - surfaceViewRect.top, areaRect.right - surfaceViewRect.left, areaRect.bottom - surfaceViewRect.top);
-			
-			Rect rectInPreview= CameraUtils.computeRect(getBaseContext(), surfaceView.getWidth(), surfaceView.getHeight(), finalRect, parameters.getPreviewSize());
-			
-//			decoder = new Decoder(getBaseContext(), previewSize, scanningAreaView.getRectInPreview(previewSize), null, null);
-			decoder = new Decoder(getBaseContext(), previewSize, rectInPreview, null, null);
-			decoder.setResultPointCallback(this);	//设置可疑点回调
-			decoder.setDecodeListener(this);	//设置解码监听器
+		Size optimalPreviewSize = new CameraOptimalSizeCalculator().getPreviewSize(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes());
+		parameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
+		camera.setParameters(parameters);
+		
+		/* 初始化解码器 */
+		if(decoder == null){
+			Size previewSize = camera.getParameters().getPreviewSize();
+			decoder = new Decoder(getBaseContext(), previewSize, CameraUtils.computeRect(getBaseContext(), surfaceView.getWidth(), surfaceView.getHeight(), ViewUtils.getRelativeRect(scanAreaView, surfaceView), previewSize), null, null);
+			decoder.setResultPointCallback(DecodeActivity.this);
+			decoder.setDecodeListener(DecodeActivity.this);
 		}
 	}
 
@@ -184,42 +172,46 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 
 	@Override
 	public void onAutoFocus(boolean success, Camera camera) {
-		if (!success) {//如果没有对好就继续对
+		if (!success) {
 			cameraManager.autoFocus();
 		}
 	}
 
 	@Override
 	public void onStartPreview() {
-		startDecode();	//开始解码
+		startDecode();
 	}
 
 	@Override
 	public void onStopPreview() {
-		stopDecode();	//停止解码
+		stopDecode();	
 	}
 	
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		decoder.decode(data);
+		if(decoder != null){
+			decoder.decode(data);
+		}
 	}
 	
 	@Override
 	public void foundPossibleResultPoint(ResultPoint arg0) {
-		scanningAreaView.addPossibleResultPoint(arg0);
+		scanAreaView.addPossibleResultPoint(arg0);
 	}
 
 	@Override
 	public void onDecodeSuccess(Result result, byte[] barcodeBitmapByteArray, float scaleFactor) {
-		stopDecode();//停止解码
-		playSound();//播放音效
-		playVibrator();//发出震动提示
+		stopDecode();
+		playSound();
+		playVibrator();
+		
 		Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
 		Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		bitmap.recycle();
 		DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, getResources().getColor(R.color.result_points));
-		scanningAreaView.drawResultBitmap(newBitmap);
+		scanAreaView.drawResultBitmap(newBitmap);
 		hintText.setText(result.getText());
+		
 		getIntent().putExtra(RETURN_BARCODE_CONTENT, result.getText());
 		setResult(RESULT_OK, getIntent());
 	}
@@ -227,17 +219,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	@Override
 	public void onDecodeFailure() {
 		if(cameraManager != null){
-			cameraManager.autoFocus();//继续对焦
-		}
-	}
-
-	private class RefreshScanFrameRunnable implements Runnable{
-		@Override
-		public void run() {
-			if(scanningAreaView != null && handler != null){
-				scanningAreaView.refresh();
-				handler.postDelayed(refreshScanFrameRunnable, 50);
-			}
+			cameraManager.autoFocus();
 		}
 	}
 
@@ -246,8 +228,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	 */
 	private void startDecode(){
 		if(decoder != null){
-			startRefreshScanFrame();//开始刷新扫描框
-			cameraManager.autoFocus();// 自动对焦
+			scanAreaView.startRefresh();
+			cameraManager.autoFocus();
 			decoder.resume();
 		}
 	}
@@ -256,31 +238,16 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	 * 停止解码
 	 */
 	private void stopDecode(){
+		scanAreaView.stopRefresh();
 		if(decoder != null){
-			stopRefreshScanFrame();//停止刷新扫描框
-			decoder.pause();//停止解码器
+			decoder.pause();
 		}
-	}
-	
-	/**
-	 * 开始刷新扫描框
-	 */
-	public void startRefreshScanFrame(){
-		handler.post(refreshScanFrameRunnable);
-	}
-	
-	/**
-	 * 停止刷新扫描框
-	 */
-	public void stopRefreshScanFrame(){
-		handler.removeCallbacks(refreshScanFrameRunnable);
 	}
 	
 	/**
 	 * 播放音效
 	 */
 	private void playSound(){
-		//播放音效
 		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 		if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
 			float volume = (float) (((float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / 15) / 3.0);
@@ -292,7 +259,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	 * 震动
 	 */
 	private void playVibrator(){
-		((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(200);//发出震动提示
+		((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(200);
 	}
 	
 	/**

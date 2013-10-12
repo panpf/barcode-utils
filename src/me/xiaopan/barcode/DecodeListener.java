@@ -1,4 +1,4 @@
-package me.xiaopan.barcodescanner;
+package me.xiaopan.barcode;
 
 import com.google.zxing.Result;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package me.xiaopan.barcodescanner;
+package me.xiaopan.barcode;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -103,10 +103,11 @@ public class Decoder implements DecodeListener{
 	 */
 	public void pause(){
 		pause = true;
+		decodeThread.pause();
 	}
 	
 	/**
-	 * 恢复工作
+	 * 开始解码
 	 */
 	public void resume(){
 		pause = false;
@@ -116,13 +117,13 @@ public class Decoder implements DecodeListener{
 	 * 释放，请务必在Activity的onDestory()中调用此方法来释放Decoder所拥用的线程
 	 */
 	public void release(){
+		pause();
 		decodeThread.finish();
 	}
 
 	@Override
 	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactor) {
 		pause();
-		decodeThread.pause();
 		Message message = decodeHandler.obtainMessage(DecodeHandler.MESSAGE_DECODE_SUCCESS, result);
 		Bundle bundle = new Bundle();
 		bundle.putByteArray(DecodeHandler.BARCODE_BITMAP, bitmapByteArray);

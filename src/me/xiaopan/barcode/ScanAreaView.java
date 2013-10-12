@@ -13,29 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package me.xiaopan.barcodescanner;
+package me.xiaopan.barcode;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-import me.xiaopan.easy.android.util.CameraUtils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.hardware.Camera;
+import android.os.Handler;
 import android.util.AttributeSet;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.google.zxing.ResultPoint;
 
 /**
  * 扫描区域视图
  */
-public class ScanningAreaView extends View {
+public class ScanAreaView extends View implements Runnable{
 	private static final int OPAQUE = 0xFF;//不透明
 	private int resultPointColor = -256;	//可疑点的颜色，默认为黄色
 	private float newResultPointRadius = 6.0f;	//新的可疑点半径
@@ -56,16 +53,17 @@ public class ScanningAreaView extends View {
 	private int height;	//扫描框的高
 	private int strokeWidth;	//描边的宽度
 	private Paint paint;	//画笔
-	private Rect rectInPreview;	//扫描框相对于预览界面的矩形
 	private Bitmap resultBitmap;	//扫描结果图片
 	private boolean init = true;	//初始化位置信息
 	private Collection<ResultPoint> possibleResultPoints;	//当前可疑点集合
 	private Collection<ResultPoint> lastPossibleResultPoints;	//上次可疑点集合
 	private Rect rect;
+	private Handler handler;
 	
-	public ScanningAreaView(Context context, AttributeSet attrs) {
+	public ScanAreaView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		paint = new Paint();
+		handler = new Handler();
 		possibleResultPoints = new HashSet<ResultPoint>(5);
 	}
 
@@ -182,22 +180,6 @@ public class ScanningAreaView extends View {
 	}
 	
 	/**
-	 * 获取扫描框相对于预览界面的矩形
-	 * @param cameraPictureSize 相机预览分辨率
-	 * @return 扫描框相对的预览界面的矩形
-	 */
-	public Rect getRectInPreview(Camera.Size cameraPictureSize) {
-		if(rectInPreview == null){
-			WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-			Display display = windowManager.getDefaultDisplay();
-			Rect goRect = new Rect();
-			getGlobalVisibleRect(goRect);
-			rectInPreview= CameraUtils.computeRect(getContext(), display.getWidth(), display.getHeight(), goRect, cameraPictureSize);
-		}
-		return rectInPreview;
-	}
-
-	/**
 	 * 刷新
 	 */
 	public void refresh() {
@@ -214,6 +196,26 @@ public class ScanningAreaView extends View {
 		}
 		resultBitmap = barcode;
 		invalidate();
+	}
+	
+	@Override
+	public void run() {
+		refresh();
+		handler.postDelayed(this, 50);
+	}
+	
+	/**
+	 * 开始刷新（移动并闪烁激光线以及显示可疑点）
+	 */
+	public void startRefresh(){
+		handler.post(this);
+	}
+	
+	/**
+	 * 停止刷新
+	 */
+	public void stopRefresh(){
+		handler.removeCallbacks(this);
 	}
 
 	/**
