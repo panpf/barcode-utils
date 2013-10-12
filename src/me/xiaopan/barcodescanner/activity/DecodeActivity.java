@@ -156,7 +156,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		/* 初始化解码器 */
 		if(decoder == null){
 			Size previewSize = camera.getParameters().getPreviewSize();
-			decoder = new Decoder(getBaseContext(), previewSize, CameraUtils.computeRect(getBaseContext(), surfaceView.getWidth(), surfaceView.getHeight(), ViewUtils.getRelativeRect(scanAreaView, surfaceView), previewSize), null, null);
+			decoder = new Decoder(getBaseContext(), previewSize, CameraUtils.computeFinderFrameRect(getBaseContext(), surfaceView.getWidth(), surfaceView.getHeight(), ViewUtils.getRelativeRect(scanAreaView, surfaceView), previewSize), null, null);
 			decoder.setResultPointCallback(DecodeActivity.this);
 			decoder.setDecodeListener(DecodeActivity.this);
 		}
