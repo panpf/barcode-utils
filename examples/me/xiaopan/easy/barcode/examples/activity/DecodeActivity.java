@@ -1,4 +1,4 @@
-package test.activity;
+package me.xiaopan.easy.barcode.examples.activity;
 
 import me.xiaopan.easy.barcode.DecodeListener;
 import me.xiaopan.easy.barcode.DecodeUtils;
