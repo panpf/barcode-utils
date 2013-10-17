@@ -1,14 +1,14 @@
 package me.xiaopan.easy.barcode.examples.activity;
 
+import me.xiaopan.easy.android.util.CameraManager;
+import me.xiaopan.easy.android.util.CameraOptimalSizeCalculator;
+import me.xiaopan.easy.android.util.CameraUtils;
+import me.xiaopan.easy.android.util.ViewUtils;
 import me.xiaopan.easy.barcode.DecodeListener;
 import me.xiaopan.easy.barcode.DecodeUtils;
 import me.xiaopan.easy.barcode.Decoder;
 import me.xiaopan.easy.barcode.R;
 import me.xiaopan.easy.barcode.ScanAreaView;
-import me.xiaopan.easy.android.util.CameraManager;
-import me.xiaopan.easy.android.util.CameraOptimalSizeCalculator;
-import me.xiaopan.easy.android.util.CameraUtils;
-import me.xiaopan.easy.android.util.ViewUtils;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;

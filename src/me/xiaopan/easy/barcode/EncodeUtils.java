@@ -6,7 +6,6 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import me.xiaopan.easy.android.util.BitmapUtils;
-
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
