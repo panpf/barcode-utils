@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="result_points">#c099cc00</color> <!-- Android standard ICS color -->
+    <color name="result_points">#c099cc00</color>
+    <color name="screen">#ffffff</color>
 </resources>

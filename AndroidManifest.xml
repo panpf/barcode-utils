@@ -4,7 +4,7 @@
     android:versionCode="101"
     android:versionName="1.0.1" >
 
-    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="18" />
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="18" />
     
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.VIBRATE"/>

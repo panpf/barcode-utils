@@ -2,7 +2,14 @@
 <resources>
 
     <string name="app_name">Easy Barcode</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    
+	<string name="editHint_content">请输入二维码内容</string>    
 
+	<string name="button_create">生成</string>
+	<string name="button_createQrcode">生成二维码</string>
+	<string name="button_decodeImage">图片解码</string>
+	
+	<string name="hint_scan">请将条码置于扫描框内</string>
+	
+	<string name="image">这是一张图片</string>
 </resources>
