@@ -33,7 +33,7 @@ public class DecodeThread extends Thread{
 		if(decodeListener != null){
 			byte[] yuvSource;
 			while(running){
-				yuvSource = yuvSources.remove();
+				yuvSource = yuvSources.poll();
 				if(yuvSource != null){
 					Log.e("TAG", "解码");
 					/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
@@ -118,7 +118,7 @@ public class DecodeThread extends Thread{
 	 */
 	public void tryDecode(byte[] yuvSource) {
 		synchronized (yuvSources) {
-			yuvSources.put(yuvSource);
+			yuvSources.add(yuvSource);
 			try{
 				yuvSources.notify();
 			}catch(Exception exception){
