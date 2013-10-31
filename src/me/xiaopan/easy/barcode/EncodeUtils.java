@@ -72,17 +72,13 @@ public class EncodeUtils {
 					errorCorrectionLevel = getErrorCorrectionLevel((float) logoWidth/(float) width);
 					if(errorCorrectionLevel == null){
 						errorCorrectionLevel = ErrorCorrectionLevel.H;
-						int maxWidth = (int) (width * 0.3);
-						int newHeight = (int) (logoHeight * ((float) maxWidth / (float) logoWidth));
-						logoBitmap = BitmapUtils.scale(logoBitmap, maxWidth, newHeight);
+						logoBitmap = BitmapUtils.scaleByWidth(logoBitmap, (int) (width * 0.3f));
 					}
 				}else{
 					errorCorrectionLevel = getErrorCorrectionLevel((float) logoHeight/(float) height);
 					if(errorCorrectionLevel == null){
 						errorCorrectionLevel = ErrorCorrectionLevel.H;
-						int maxHeight = (int) (height * 0.3);
-						int newWidth = (int) (logoWidth * ((float) maxHeight / (float) logoHeight));
-						logoBitmap = BitmapUtils.scale(logoBitmap, newWidth, maxHeight);
+						logoBitmap = BitmapUtils.scaleByHeight(logoBitmap, (int) (height * 0.3f));
 					}
 				}
 				hints.put(EncodeHintType.ERROR_CORRECTION, errorCorrectionLevel);
