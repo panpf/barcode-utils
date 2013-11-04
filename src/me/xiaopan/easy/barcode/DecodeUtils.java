@@ -34,7 +34,6 @@ public class DecodeUtils {
     	int height = bitmap.getHeight();
     	int[] pixels = new int[width * height];
     	bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-    	bitmap.recycle();
 		return multiFormatReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(new RGBLuminanceSource(width, height, pixels))));
 	}
 	
@@ -69,7 +68,10 @@ public class DecodeUtils {
 	 * @throws NotFoundException 在Bitmap中没有找到二维码时抛出此异常
 	 */
 	public static final Result decodeFile(String imageFilePath, MultiFormatReader multiFormatReader) throws NotFoundException{
-    	return decodeBitmap(BitmapFactory.decodeFile(imageFilePath), multiFormatReader);
+    	Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
+		Result result = decodeBitmap(bitmap, multiFormatReader);
+		bitmap.recycle();
+		return result;
 	}
 	
 	/**
@@ -80,7 +82,10 @@ public class DecodeUtils {
      * @throws NotFoundException 没有在图片中找到二维码时抛出此异常
      */
 	public static final Result decodeFile(String imageFilePath, Map<DecodeHintType, Object> hints) throws NotFoundException{
-    	return decodeBitmap(BitmapFactory.decodeFile(imageFilePath), hints);
+		Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
+		Result result = decodeBitmap(bitmap, hints);
+		bitmap.recycle();
+		return result;
 	}
 	
 	/**
@@ -90,7 +95,10 @@ public class DecodeUtils {
      * @throws NotFoundException 没有在图片中找到二维码时抛出此异常
      */
 	public static final Result decodeFile(String imageFilePath) throws NotFoundException{
-    	return decodeBitmap(BitmapFactory.decodeFile(imageFilePath));
+		Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
+		Result result = decodeBitmap(bitmap);
+		bitmap.recycle();
+		return result;
 	}
 	
 	/**
