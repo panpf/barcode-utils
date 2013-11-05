@@ -24,7 +24,7 @@ public class DecodeThread extends Thread{
 	public DecodeThread(Decoder decoder, DecodeListener decodeListener) {
 		this.decoder = decoder;
 		this.decodeListener = decodeListener;
-		yuvSources = new Circle<byte[]>(2);
+		yuvSources = new Circle<byte[]>(1);
 	}
 	
 	@Override
