@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import me.xiaopan.easy.android.util.CameraUtils;
 import me.xiaopan.easy.java.util.Circle;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.PlanarYUVLuminanceSource;
@@ -35,7 +34,6 @@ public class DecodeThread extends Thread{
 			while(running){
 				yuvSource = yuvSources.poll();
 				if(yuvSource != null){
-					Log.e("TAG", "解码");
 					/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
 					int previewWidth = decoder.getCameraPreviewSize().width;
 					int previewHeight = decoder.getCameraPreviewSize().height;
@@ -75,7 +73,6 @@ public class DecodeThread extends Thread{
 						}
 					}
 				}else{
-					Log.e("TAG", "等待");
 					synchronized (yuvSources) {
 						try {
 							yuvSources.wait();

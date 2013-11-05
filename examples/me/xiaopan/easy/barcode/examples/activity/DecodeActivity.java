@@ -113,7 +113,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		
 		/* 初始化 */
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), this);
-		cameraManager.setFocusIntervalTime(1500);
+		cameraManager.setFocusIntervalTime(2500);
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 	}
@@ -163,11 +163,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		/* 初始化解码器 */
 		if(decoder == null){
 			Size previewSize = camera.getParameters().getPreviewSize();
-//			decoder = new Decoder(getBaseContext(), previewSize, CameraUtils.computeFinderFrameRect(getBaseContext(), surfaceView.getWidth(), surfaceView.getHeight(), ViewUtils.getRelativeRect(scanAreaView, surfaceView), previewSize), null, null);
 			decoder = new Decoder(getBaseContext(), previewSize, 
-					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), 
-							ViewUtils.getRelativeRect(scanAreaView, surfaceView), 
-							new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
 					, null, null);
 			decoder.setResultPointCallback(DecodeActivity.this);
 			decoder.setDecodeListener(DecodeActivity.this);
