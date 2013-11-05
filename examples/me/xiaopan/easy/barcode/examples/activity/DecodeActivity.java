@@ -3,6 +3,7 @@ package me.xiaopan.easy.barcode.examples.activity;
 import me.xiaopan.easy.android.util.CameraManager;
 import me.xiaopan.easy.android.util.CameraOptimalSizeCalculator;
 import me.xiaopan.easy.android.util.CameraUtils;
+import me.xiaopan.easy.android.util.Utils;
 import me.xiaopan.easy.android.util.ViewUtils;
 import me.xiaopan.easy.barcode.DecodeListener;
 import me.xiaopan.easy.barcode.DecodeUtils;
@@ -11,9 +12,11 @@ import me.xiaopan.easy.barcode.R;
 import me.xiaopan.easy.barcode.ScanAreaView;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.media.AudioManager;
@@ -131,10 +134,14 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	@Override
 	protected void onDestroy() {
 		cameraManager = null;
-		soundPool.release();
-		soundPool = null;
-		decoder.release();
-		decoder = null;
+		if(soundPool != null){
+			soundPool.release();
+			soundPool = null;
+		}
+		if(decoder != null){
+			decoder.release();
+			decoder = null;
+		}
 		super.onDestroy();
 	}
 
@@ -156,7 +163,12 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		/* 初始化解码器 */
 		if(decoder == null){
 			Size previewSize = camera.getParameters().getPreviewSize();
-			decoder = new Decoder(getBaseContext(), previewSize, CameraUtils.computeFinderFrameRect(getBaseContext(), surfaceView.getWidth(), surfaceView.getHeight(), ViewUtils.getRelativeRect(scanAreaView, surfaceView), previewSize), null, null);
+//			decoder = new Decoder(getBaseContext(), previewSize, CameraUtils.computeFinderFrameRect(getBaseContext(), surfaceView.getWidth(), surfaceView.getHeight(), ViewUtils.getRelativeRect(scanAreaView, surfaceView), previewSize), null, null);
+			decoder = new Decoder(getBaseContext(), previewSize, 
+					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), 
+							ViewUtils.getRelativeRect(scanAreaView, surfaceView), 
+							new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+					, null, null);
 			decoder.setResultPointCallback(DecodeActivity.this);
 			decoder.setDecodeListener(DecodeActivity.this);
 		}
