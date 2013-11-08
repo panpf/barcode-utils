@@ -3,7 +3,7 @@ package me.xiaopan.easy.barcode;
 import java.io.ByteArrayOutputStream;
 
 import me.xiaopan.easy.android.util.CameraUtils;
-import me.xiaopan.easy.java.util.Circle;
+import me.xiaopan.easy.java.util.CircleList;
 import android.graphics.Bitmap;
 
 import com.google.zxing.BinaryBitmap;
@@ -18,12 +18,12 @@ public class DecodeThread extends Thread{
 	private boolean running;
 	private Decoder decoder;
 	private DecodeListener decodeListener;
-	private Circle<byte[]> yuvSources;
+	private CircleList<byte[]> yuvSources;
 	
 	public DecodeThread(Decoder decoder, DecodeListener decodeListener) {
 		this.decoder = decoder;
 		this.decodeListener = decodeListener;
-		yuvSources = new Circle<byte[]>(1);
+		yuvSources = new CircleList<byte[]>(1);
 	}
 	
 	@Override
