@@ -114,6 +114,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		/* 初始化 */
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), this);
 		cameraManager.setFocusIntervalTime(1000);
+		cameraManager.setDebugMode(true);
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 	}
