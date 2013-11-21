@@ -166,8 +166,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			decoder = new Decoder(getBaseContext(), previewSize, 
 					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
 					, null, null);
-			decoder.setResultPointCallback(DecodeActivity.this);
-			decoder.setDecodeListener(DecodeActivity.this);
+			decoder.setResultPointCallback(this);
+			decoder.setDecodeListener(this);
 		}
 	}
 
@@ -204,22 +204,32 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	
 	@Override
 	public void foundPossibleResultPoint(ResultPoint arg0) {
-		scanAreaView.addResultPoint(arg0);
+		if(scanAreaView != null){
+			scanAreaView.addResultPoint(arg0);
+		}
 	}
 
 	@Override
 	public void onDecodeSuccess(Result result, byte[] barcodeBitmapByteArray, float scaleFactor) {
 		stopDecode();
-		playSound();
-		playVibrator();
 		
+		/* 播放音效 */
+		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+		if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
+			float volume = (float) (((float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / 15) / 3.0);
+			soundPool.play(beepId, volume, volume, 100, 0, 1);
+		}
+		
+		((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(200);//发出震动提示
+		
+		/* 处理结果 */
 		Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
 		Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		bitmap.recycle();
-		DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, getResources().getColor(R.color.result_points));
+		DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
 		scanAreaView.drawResultBitmap(newBitmap);
-		hintText.setText(result.getText());
 		
+		hintText.setText(result.getText());
 		getIntent().putExtra(RETURN_BARCODE_CONTENT, result.getText());
 		setResult(RESULT_OK, getIntent());
 	}
@@ -250,24 +260,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		if(decoder != null){
 			decoder.pause();
 		}
-	}
-	
-	/**
-	 * 播放音效
-	 */
-	private void playSound(){
-		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-		if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
-			float volume = (float) (((float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / 15) / 3.0);
-			soundPool.play(beepId, volume, volume, 100, 0, 1);
-		}
-	}
-	
-	/**
-	 * 震动
-	 */
-	private void playVibrator(){
-		((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(200);
 	}
 	
 	/**
