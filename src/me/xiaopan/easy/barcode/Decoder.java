@@ -19,6 +19,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Vector;
 
+import me.xiaopan.easy.barcode.DecodeThread.DecodeListener;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -27,28 +28,18 @@ import android.hardware.Camera;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.MultiFormatReader;
-import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 
 /**
  * 解码器
  */
-public class Decoder implements DecodeListener{
-	private Camera.Size cameraPreviewSize;	//相机预览尺寸
-	private Rect scanningAreaRect;	//扫描框相对于预览界面的矩形
-	private MultiFormatReader multiFormatReader;	//解码读取器
-	private ResultPointCallback resultPointCallback;	//结果可疑点回调对象
-	private DecodeListener decodeListener;	//解码监听器
-	private DecodeThread decodeThread;	//解码线程
-	private boolean isPortrait;	//是否是竖屏
+public class Decoder{
 	private boolean running = true;	//运行中
+	private DecodeThread decodeThread;	//解码线程
+	private ResultPointCallback resultPointCallback;
 	
-	public Decoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, String charset){
-		this.cameraPreviewSize = cameraPreviewSize;
-		this.scanningAreaRect = scanningAreaRect;
-		isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-		
+	public Decoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
 		if(hints == null){
 			hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
 		}
@@ -62,25 +53,21 @@ public class Decoder implements DecodeListener{
 		}
 		
 		if(!hints.containsKey(DecodeHintType.CHARACTER_SET)){
-			if(charset != null && !"".equals(charset.trim())){
-				hints.put(DecodeHintType.CHARACTER_SET, charset);
-			}else{
-				hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
-			}
+			hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
 		}
 		
 		hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK, new ResultPointCallback() {
 			@Override
 			public void foundPossibleResultPoint(ResultPoint arg0) {
-				if(getResultPointCallback() != null){
-					getResultPointCallback().foundPossibleResultPoint(arg0);
+				if(resultPointCallback != null){
+					resultPointCallback.foundPossibleResultPoint(arg0);
 				}
 			}
 		});
 		
-		multiFormatReader = new MultiFormatReader();
+		MultiFormatReader multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(hints);
-		decodeThread = new DecodeThread(this, this);
+		decodeThread = new DecodeThread(multiFormatReader, decodeListener, cameraPreviewSize, scanningAreaRect, context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		decodeThread.start();
 	}
 	
@@ -117,81 +104,11 @@ public class Decoder implements DecodeListener{
 		decodeThread.finish();
 	}
 
-	@Override
-	public void onDecodeSuccess(final Result result, final byte[] bitmapByteArray, final float scaleFactor) {
-		if(decodeListener != null){
-			decodeListener.onDecodeSuccess(result, bitmapByteArray, scaleFactor);
-		}
-	}
-
-	@Override
-	public void onDecodeFailure() {
-		if(decodeListener != null){
-			decodeListener.onDecodeFailure();
-		}
-	}
-
 	public ResultPointCallback getResultPointCallback() {
 		return resultPointCallback;
 	}
 
 	public void setResultPointCallback(ResultPointCallback resultPointCallback) {
 		this.resultPointCallback = resultPointCallback;
-	}
-
-	public DecodeListener getDecodeListener() {
-		return decodeListener;
-	}
-
-	public void setDecodeListener(DecodeListener decodeListener) {
-		this.decodeListener = decodeListener;
-	}
-
-	public Camera.Size getCameraPreviewSize() {
-		return cameraPreviewSize;
-	}
-
-	public void setCameraPreviewSize(Camera.Size cameraPreviewSize) {
-		this.cameraPreviewSize = cameraPreviewSize;
-	}
-
-	public MultiFormatReader getMultiFormatReader() {
-		return multiFormatReader;
-	}
-
-	public void setMultiFormatReader(MultiFormatReader multiFormatReader) {
-		this.multiFormatReader = multiFormatReader;
-	}
-
-	public boolean isPortrait() {
-		return isPortrait;
-	}
-
-	public void setPortrait(boolean isPortrait) {
-		this.isPortrait = isPortrait;
-	}
-
-	public Rect getScanningAreaRect() {
-		return scanningAreaRect;
-	}
-
-	public void setScanningAreaRect(Rect scanningAreaRect) {
-		this.scanningAreaRect = scanningAreaRect;
-	}
-
-	public DecodeThread getDecodeThread() {
-		return decodeThread;
-	}
-
-	public void setDecodeThread(DecodeThread decodeThread) {
-		this.decodeThread = decodeThread;
-	}
-
-	public boolean isPause() {
-		return running;
-	}
-
-	public void setPause(boolean pause) {
-		this.running = pause;
 	}
 }

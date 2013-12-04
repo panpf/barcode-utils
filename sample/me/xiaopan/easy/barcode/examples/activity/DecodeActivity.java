@@ -6,7 +6,7 @@ import me.xiaopan.easy.android.util.ViewUtils;
 import me.xiaopan.easy.android.util.camera.AutoFocusManager;
 import me.xiaopan.easy.android.util.camera.CameraOptimalSizeCalculator;
 import me.xiaopan.easy.android.util.camera.CameraUtils;
-import me.xiaopan.easy.barcode.DecodeListener;
+import me.xiaopan.easy.barcode.DecodeThread.DecodeListener;
 import me.xiaopan.easy.barcode.DecodeUtils;
 import me.xiaopan.easy.barcode.Decoder;
 import me.xiaopan.easy.barcode.R;
@@ -175,9 +175,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			Size previewSize = camera.getParameters().getPreviewSize();
 			decoder = new Decoder(getBaseContext(), previewSize, 
 					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-					, null, null);
+					, null, this);
 			decoder.setResultPointCallback(this);
-			decoder.setDecodeListener(this);
 		}
 		
 		autoFocusManager.setCamera(camera);
