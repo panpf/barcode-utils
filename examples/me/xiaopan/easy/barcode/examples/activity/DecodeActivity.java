@@ -1,10 +1,11 @@
 package me.xiaopan.easy.barcode.examples.activity;
 
 import me.xiaopan.easy.android.util.CameraManager;
-import me.xiaopan.easy.android.util.CameraOptimalSizeCalculator;
-import me.xiaopan.easy.android.util.CameraUtils;
 import me.xiaopan.easy.android.util.Utils;
 import me.xiaopan.easy.android.util.ViewUtils;
+import me.xiaopan.easy.android.util.camera.AutoFocusManager;
+import me.xiaopan.easy.android.util.camera.CameraOptimalSizeCalculator;
+import me.xiaopan.easy.android.util.camera.CameraUtils;
 import me.xiaopan.easy.barcode.DecodeListener;
 import me.xiaopan.easy.barcode.DecodeUtils;
 import me.xiaopan.easy.barcode.Decoder;
@@ -55,6 +56,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private ToggleButton flashButton;
 	private ScanAreaView scanAreaView;
 	private CameraManager cameraManager;
+	private AutoFocusManager autoFocusManager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +119,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		cameraManager.setDebugMode(true);
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
+		autoFocusManager = new AutoFocusManager(null);
 	}
 	
 	@Override
@@ -170,6 +173,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			decoder.setResultPointCallback(this);
 			decoder.setDecodeListener(this);
 		}
+		
+		autoFocusManager.setCamera(camera);
 	}
 
 	@Override
@@ -180,11 +185,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	}
 
 	@Override
-	public void onAutoFocus(boolean success, Camera camera) {
-		if (!success) {
-			cameraManager.autoFocus();
-		}
-	}
+	public void onAutoFocus(boolean success, Camera camera) {}
 
 	@Override
 	public void onStartPreview() {
@@ -237,9 +238,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 
 	@Override
 	public void onDecodeFailure() {
-		if(cameraManager != null){
-			cameraManager.autoFocus();
-		}
 	}
 
 	/**
@@ -248,7 +246,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private void startDecode(){
 		if(decoder != null){
 			scanAreaView.startRefresh();
-			cameraManager.autoFocus();
+			autoFocusManager.start();
 			decoder.resume();
 		}
 	}
@@ -258,6 +256,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	 */
 	private void stopDecode(){
 		scanAreaView.stopRefresh();
+		autoFocusManager.stop();
 		if(decoder != null){
 			decoder.pause();
 		}
