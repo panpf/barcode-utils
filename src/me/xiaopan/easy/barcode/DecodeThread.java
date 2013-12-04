@@ -25,6 +25,7 @@ public class DecodeThread extends Thread{
 	private DecodeListener decodeListener;	//解码监听器
 	private BoundedQueue<byte[]> yuvSources;	//yuv源数据
 	private MultiFormatReader multiFormatReader;	//多格式解码器
+	private boolean returnBitmap = true;
 	
 	public DecodeThread(MultiFormatReader multiFormatReader, DecodeListener decodeListener, Camera.Size cameraPreviewSize, Rect scanningAreaRect, boolean isPortrait) {
 		this.multiFormatReader = multiFormatReader;
@@ -67,14 +68,20 @@ public class DecodeThread extends Thread{
 					/* 解码结果处理 */
 					if (decodeResult != null) {
 						if(decodeListener != null){
-							int[] pixels = planarYUVLuminanceSource.renderThumbnail();
-							int width = planarYUVLuminanceSource.getThumbnailWidth();
-							int height = planarYUVLuminanceSource.getThumbnailHeight();
-							Bitmap bitmap = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
-							ByteArrayOutputStream out = new ByteArrayOutputStream();    
-							bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-							bitmap.recycle();
-							decodeListener.onDecodeSuccess(decodeResult, out.toByteArray(), (float) width / planarYUVLuminanceSource.getWidth());
+							byte[] bitmapData = null;
+							float scaleFactor = 0.0f;
+							if(isReturnBitmap()){
+								int[] pixels = planarYUVLuminanceSource.renderThumbnail();
+								int width = planarYUVLuminanceSource.getThumbnailWidth();
+								int height = planarYUVLuminanceSource.getThumbnailHeight();
+								Bitmap bitmap = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
+								ByteArrayOutputStream out = new ByteArrayOutputStream();    
+								bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+								bitmap.recycle();
+								bitmapData = out.toByteArray();
+								scaleFactor = (float) width / planarYUVLuminanceSource.getWidth();
+							}
+							decodeListener.onDecodeSuccess(decodeResult, bitmapData, scaleFactor);
 						}
 					} else {
 						if(decodeListener != null){
@@ -133,6 +140,14 @@ public class DecodeThread extends Thread{
 		}
 	}
 	
+	public boolean isReturnBitmap() {
+		return returnBitmap;
+	}
+
+	public void setReturnBitmap(boolean returnBitmap) {
+		this.returnBitmap = returnBitmap;
+	}
+
 	/**
 	 * 解码监听器
 	 */

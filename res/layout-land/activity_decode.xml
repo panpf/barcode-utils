@@ -9,7 +9,7 @@
        	    <ToggleButton 
        	        android:layout_width="wrap_content" 
        	        android:layout_height="wrap_content"
-       	        android:id="@+id/checkBox_decode_flash"
+       	        android:id="@+id/toggleButton_decode_flash"
        	        android:button="@null"
        	        android:drawableLeft="@drawable/selector_button_flash"
        	        android:drawablePadding="6dp"

@@ -48,19 +48,20 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private static final String STATE_FLASH_CHECKED = "STATE_FLASH_CHECKED";
 	private static final int REQUEST_CODE_GET_IMAGE = 46231;
 	private int beepId;
+	private int number;
 	private View createQRCodeButton;
 	private View imageDecodeButton;
+	private Handler handler;
 	private Decoder decoder;
 	private TextView barcodeText;
 	private TextView numberText;
 	private SoundPool soundPool;
 	private SurfaceView surfaceView;	
 	private ToggleButton flashButton;
+	private ToggleButton modeToggleButton;
 	private ScanAreaView scanAreaView;
 	private CameraManager cameraManager;
 	private AutoFocusManager autoFocusManager;
-	private Handler handler;
-	private int number;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +74,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		setContentView(R.layout.activity_decode);
 		surfaceView = (SurfaceView) findViewById(R.id.surface_decode);
 		scanAreaView = (ScanAreaView) findViewById(R.id.scannArea_decode);
-		flashButton = (ToggleButton) findViewById(R.id.checkBox_decode_flash);
+		flashButton = (ToggleButton) findViewById(R.id.toggleButton_decode_flash);
+		modeToggleButton = (ToggleButton) findViewById(R.id.toggleButton_decode_mode);
 		barcodeText = (TextView) findViewById(R.id.text_decode_content);
 		numberText = (TextView) findViewById(R.id.text_decode_number);
 		createQRCodeButton = findViewById(R.id.button_decode_createQRCode);
@@ -92,6 +94,13 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				setEnableTorckFlashMode(isChecked);
+			}
+		});
+		
+		modeToggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				decoder.setReturnBitmap(!isChecked);
 			}
 		});
 		
@@ -217,28 +226,31 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	}
 
 	@Override
-	public void onDecodeSuccess(final Result result, byte[] barcodeBitmapByteArray, float scaleFactor) {
-		stopDecode();
-		
-		/* 播放音效 */
-		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-		if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
-			float volume = (float) (((float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / 15) / 3.0);
-			soundPool.play(beepId, volume, volume, 100, 0, 1);
+	public void onDecodeSuccess(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
+		if(!modeToggleButton.isChecked()){
+			stopDecode();	//停止解码
+			
+			/* 播放音效 */
+			AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+			if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
+				float volume = (float) (((float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / 15) / 3.0);
+				soundPool.play(beepId, volume, volume, 100, 0, 1);
+			}
 		}
-		
+
 		((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(200);//发出震动提示
-		
-		/* 处理结果 */
-		Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
-		final Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-		bitmap.recycle();
-		DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
 
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				scanAreaView.drawResultBitmap(newBitmap);
+				/* 处理并显示结果图 */
+				if(!modeToggleButton.isChecked()){
+					Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
+					final Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+					bitmap.recycle();
+					DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
+					scanAreaView.drawResultBitmap(newBitmap);
+				}
 				barcodeText.setText(result.getText());
 				numberText.setText(""+(++number));
 			}

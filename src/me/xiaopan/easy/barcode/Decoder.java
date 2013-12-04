@@ -111,4 +111,12 @@ public class Decoder{
 	public void setResultPointCallback(ResultPointCallback resultPointCallback) {
 		this.resultPointCallback = resultPointCallback;
 	}
+	
+	public boolean isReturnBitmap() {
+		return decodeThread.isReturnBitmap();
+	}
+
+	public void setReturnBitmap(boolean returnBitmap) {
+		decodeThread.setReturnBitmap(returnBitmap);
+	}
 }

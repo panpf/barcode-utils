@@ -5,19 +5,33 @@
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:baselineAligned="false">
         <!-- 功能区 -->
         <LinearLayout android:layout_width="match_parent" android:orientation="vertical" android:layout_height="0dp" android:layout_weight="1" android:background="#70000000" android:padding="16dp">
-       	    <!-- 闪光灯控制按钮 -->
-       	    <ToggleButton 
-       	        android:layout_width="wrap_content" 
-       	        android:layout_height="wrap_content"
-       	        android:id="@+id/checkBox_decode_flash"
-       	        android:button="@null"
-       	        android:drawableLeft="@drawable/selector_button_flash"
-       	        android:drawablePadding="6dp"
-       	        android:textOn="打开"
-       	        android:textOff="关闭"
-       	        android:checked="false"
-       	        android:layout_gravity="right"
-       	        android:background="@drawable/button_flashlight_normal"/>
+       	    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+	       	    <ToggleButton 
+	       	        android:id="@+id/toggleButton_decode_mode"
+	       	        android:layout_width="wrap_content" 
+	       	        android:layout_height="wrap_content"
+	       	        android:textOn="连扫"
+	       	        android:textOff="单扫"/>
+	       	    
+	       	    <TextView 
+	       	        android:layout_width="0dp"
+	       	        android:layout_height="wrap_content"
+	       	        android:layout_weight="1"/>
+	       	    
+	       	    <!-- 闪光灯控制按钮 -->
+	       	    <ToggleButton 
+	       	        android:layout_width="wrap_content" 
+	       	        android:layout_height="wrap_content"
+	       	        android:id="@+id/toggleButton_decode_flash"
+	       	        android:button="@null"
+	       	        android:drawableLeft="@drawable/selector_button_flash"
+	       	        android:drawablePadding="6dp"
+	       	        android:textOn="打开"
+	       	        android:textOff="关闭"
+	       	        android:checked="false"
+	       	        android:layout_gravity="right"
+	       	        android:background="@drawable/button_flashlight_normal"/>
+       	    </LinearLayout>
        	    
        	    <TextView 
        	        android:id="@+id/text_decode_content" 
