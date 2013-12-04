@@ -11,7 +11,6 @@ import me.xiaopan.easy.barcode.DecodeUtils;
 import me.xiaopan.easy.barcode.Decoder;
 import me.xiaopan.easy.barcode.R;
 import me.xiaopan.easy.barcode.ScanAreaView;
-import me.xiaopan.easy.java.util.StringUtils;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -25,6 +24,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -51,13 +51,16 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private View createQRCodeButton;
 	private View imageDecodeButton;
 	private Decoder decoder;
-	private TextView hintText;
+	private TextView barcodeText;
+	private TextView numberText;
 	private SoundPool soundPool;
 	private SurfaceView surfaceView;	
 	private ToggleButton flashButton;
 	private ScanAreaView scanAreaView;
 	private CameraManager cameraManager;
 	private AutoFocusManager autoFocusManager;
+	private Handler handler;
+	private int number;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +74,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		surfaceView = (SurfaceView) findViewById(R.id.surface_decode);
 		scanAreaView = (ScanAreaView) findViewById(R.id.scannArea_decode);
 		flashButton = (ToggleButton) findViewById(R.id.checkBox_decode_flash);
-		hintText = (TextView) findViewById(R.id.text_decode_hint);
+		barcodeText = (TextView) findViewById(R.id.text_decode_content);
+		numberText = (TextView) findViewById(R.id.text_decode_number);
 		createQRCodeButton = findViewById(R.id.button_decode_createQRCode);
 		imageDecodeButton = findViewById(R.id.button_decode_imageDecode);
 		
@@ -115,13 +119,13 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		}
 		
 		/* 初始化 */
+		handler = new Handler();
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), this);
 		cameraManager.setFocusIntervalTime(1000);
 		cameraManager.setDebugMode(true);
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 		autoFocusManager = new AutoFocusManager(null);
-		hintText.setText("0");
 	}
 	
 	@Override
@@ -214,7 +218,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	}
 
 	@Override
-	public void onDecodeSuccess(Result result, byte[] barcodeBitmapByteArray, float scaleFactor) {
+	public void onDecodeSuccess(final Result result, byte[] barcodeBitmapByteArray, float scaleFactor) {
 		stopDecode();
 		
 		/* 播放音效 */
@@ -228,16 +232,18 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		
 		/* 处理结果 */
 		Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
-		Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+		final Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		bitmap.recycle();
 		DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
-		scanAreaView.drawResultBitmap(newBitmap);
-		
-//		hintText.setText(result.getText());
-		String text = (String)hintText.getText();
-		hintText.setText(StringUtils.isNotEmpty(text)?(Integer.valueOf(text)+1)+"":"1");
-		getIntent().putExtra(RETURN_BARCODE_CONTENT, result.getText());
-		setResult(RESULT_OK, getIntent());
+
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				scanAreaView.drawResultBitmap(newBitmap);
+				barcodeText.setText(result.getText());
+				numberText.setText(""+(++number));
+			}
+		});
 	}
 
 	@Override
@@ -306,13 +312,13 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
                     	try {
 							Result result = DecodeUtils.decodeFile(imageFilePath);
 							if(result != null){
-								hintText.setText(result.getText());
+								numberText.setText(result.getText());
 							}else{
-								hintText.setText("解码失败");
+								numberText.setText("解码失败");
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
-							hintText.setText("解码失败");
+							numberText.setText("解码失败");
 						}
                     }else{
                     	Toast.makeText(getBaseContext(), "图片不存在", Toast.LENGTH_SHORT).show();

@@ -4,7 +4,7 @@
     
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:baselineAligned="false">
         <!-- 功能区 -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:background="#70000000" android:gravity="right" android:padding="16dp">
+        <LinearLayout android:layout_width="match_parent" android:orientation="vertical" android:layout_height="0dp" android:layout_weight="1" android:background="#70000000" android:padding="16dp">
        	    <!-- 闪光灯控制按钮 -->
        	    <ToggleButton 
        	        android:layout_width="wrap_content" 
@@ -16,7 +16,19 @@
        	        android:textOn="打开"
        	        android:textOff="关闭"
        	        android:checked="false"
+       	        android:layout_gravity="right"
        	        android:background="@drawable/button_flashlight_normal"/>
+       	    
+       	    <TextView 
+       	        android:id="@+id/text_decode_content" 
+       	        android:layout_width="wrap_content" 
+       	        android:layout_height="0dp" 
+       	        android:layout_weight="1"
+       	        android:layout_gravity="center" 
+       	        android:textSize="15sp" 
+       	        android:textColor="#FFFFFFFF" 
+       	        android:autoLink="all"
+       	        android:gravity="center"/>
         </LinearLayout>
         
         <!-- 扫描框区 -->
@@ -28,7 +40,7 @@
         
         <!-- 提示区 -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:padding="16dp" android:background="#70000000" android:gravity="center">
-            <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:id="@+id/text_decode_hint" android:textSize="15sp" android:textColor="#FFFFFFFF" android:gravity="center" android:text="@string/hint_scan"/> 
+            <TextView android:layout_width="wrap_content" android:layout_height="0dp" android:layout_weight="1" android:id="@+id/text_decode_number" android:textSize="15sp" android:textColor="#FFFFFFFF" android:gravity="center" android:text="@string/hint_scan"/> 
         	<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
         	    <Button android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/button_createQrcode" android:layout_marginRight="8dp" android:id="@+id/button_decode_createQRCode"/>
         	    <Button android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/button_decodeImage" android:id="@+id/button_decode_imageDecode"/>

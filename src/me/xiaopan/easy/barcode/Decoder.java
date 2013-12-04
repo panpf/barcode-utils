@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.os.Handler;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
@@ -44,7 +43,6 @@ public class Decoder implements DecodeListener{
 	private DecodeThread decodeThread;	//解码线程
 	private boolean isPortrait;	//是否是竖屏
 	private boolean running = true;	//运行中
-	private Handler handler = new Handler();
 	
 	public Decoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, String charset){
 		this.cameraPreviewSize = cameraPreviewSize;
@@ -122,24 +120,14 @@ public class Decoder implements DecodeListener{
 	@Override
 	public void onDecodeSuccess(final Result result, final byte[] bitmapByteArray, final float scaleFactor) {
 		if(decodeListener != null){
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					decodeListener.onDecodeSuccess(result, bitmapByteArray, scaleFactor);
-				}
-			});
+			decodeListener.onDecodeSuccess(result, bitmapByteArray, scaleFactor);
 		}
 	}
 
 	@Override
 	public void onDecodeFailure() {
 		if(decodeListener != null){
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					decodeListener.onDecodeFailure();
-				}
-			});
+			decodeListener.onDecodeFailure();
 		}
 	}
 
