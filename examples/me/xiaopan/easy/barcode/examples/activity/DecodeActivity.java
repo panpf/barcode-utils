@@ -11,6 +11,7 @@ import me.xiaopan.easy.barcode.DecodeUtils;
 import me.xiaopan.easy.barcode.Decoder;
 import me.xiaopan.easy.barcode.R;
 import me.xiaopan.easy.barcode.ScanAreaView;
+import me.xiaopan.easy.java.util.StringUtils;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -120,6 +121,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 		autoFocusManager = new AutoFocusManager(null);
+		hintText.setText("0");
 	}
 	
 	@Override
@@ -231,7 +233,9 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
 		scanAreaView.drawResultBitmap(newBitmap);
 		
-		hintText.setText(result.getText());
+//		hintText.setText(result.getText());
+		String text = (String)hintText.getText();
+		hintText.setText(StringUtils.isNotEmpty(text)?(Integer.valueOf(text)+1)+"":"1");
 		getIntent().putExtra(RETURN_BARCODE_CONTENT, result.getText());
 		setResult(RESULT_OK, getIntent());
 	}

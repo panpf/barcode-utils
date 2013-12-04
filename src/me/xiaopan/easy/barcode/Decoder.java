@@ -23,8 +23,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.os.Bundle;
-import android.os.Message;
+import android.os.Handler;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
@@ -43,9 +42,9 @@ public class Decoder implements DecodeListener{
 	private ResultPointCallback resultPointCallback;	//结果可疑点回调对象
 	private DecodeListener decodeListener;	//解码监听器
 	private DecodeThread decodeThread;	//解码线程
-	private DecodeMessageHandler decodeHandler;	//解码处理器
 	private boolean isPortrait;	//是否是竖屏
-	private boolean pause;
+	private boolean running = true;	//运行中
+	private Handler handler = new Handler();
 	
 	public Decoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, String charset){
 		this.cameraPreviewSize = cameraPreviewSize;
@@ -83,7 +82,6 @@ public class Decoder implements DecodeListener{
 		
 		multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(hints);
-		decodeHandler = new DecodeMessageHandler(this);
 		decodeThread = new DecodeThread(this, this);
 		decodeThread.start();
 	}
@@ -93,7 +91,7 @@ public class Decoder implements DecodeListener{
 	 * @param sourceData 源数据
 	 */
 	public void decode(byte[] sourceData) {
-		if(!isPause()){
+		if(running){
 			decodeThread.tryDecode(sourceData);
 		}
 	}
@@ -102,15 +100,15 @@ public class Decoder implements DecodeListener{
 	 * 暂停解码
 	 */
 	public void pause(){
-		pause = true;
+		running = false;
 		decodeThread.pause();
 	}
 	
 	/**
-	 * 开始解码
+	 * 恢复解码
 	 */
 	public void resume(){
-		pause = false;
+		running = true;
 	}
 	
 	/**
@@ -122,19 +120,27 @@ public class Decoder implements DecodeListener{
 	}
 
 	@Override
-	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactor) {
-		pause();
-		Message message = decodeHandler.obtainMessage(DecodeMessageHandler.MESSAGE_WHAT_DECODE_SUCCESS, result);
-		Bundle bundle = new Bundle();
-		bundle.putByteArray(DecodeMessageHandler.PARAM_BYTE_ARRAY_BARCODE_BITMAP, bitmapByteArray);
-		bundle.putFloat(DecodeMessageHandler.PARAM_FLOAT_BARCODE_SCALED_FACTOR, scaleFactor);
-		message.setData(bundle);
-		message.sendToTarget();
+	public void onDecodeSuccess(final Result result, final byte[] bitmapByteArray, final float scaleFactor) {
+		if(decodeListener != null){
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					decodeListener.onDecodeSuccess(result, bitmapByteArray, scaleFactor);
+				}
+			});
+		}
 	}
 
 	@Override
 	public void onDecodeFailure() {
-		decodeHandler.obtainMessage(DecodeMessageHandler.MESSAGE_WHAT_DECODE_FAILURE).sendToTarget();
+		if(decodeListener != null){
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					decodeListener.onDecodeFailure();
+				}
+			});
+		}
 	}
 
 	public ResultPointCallback getResultPointCallback() {
@@ -177,14 +183,6 @@ public class Decoder implements DecodeListener{
 		this.isPortrait = isPortrait;
 	}
 
-	public DecodeMessageHandler getDecodeHandler() {
-		return decodeHandler;
-	}
-
-	public void setDecodeHandler(DecodeMessageHandler decodeHandler) {
-		this.decodeHandler = decodeHandler;
-	}
-
 	public Rect getScanningAreaRect() {
 		return scanningAreaRect;
 	}
@@ -202,10 +200,10 @@ public class Decoder implements DecodeListener{
 	}
 
 	public boolean isPause() {
-		return pause;
+		return running;
 	}
 
 	public void setPause(boolean pause) {
-		this.pause = pause;
+		this.running = pause;
 	}
 }
