@@ -1,9 +1,9 @@
 package me.xiaopan.easy.barcode.examples.activity;
 
-import me.xiaopan.easy.android.util.CameraManager;
 import me.xiaopan.easy.android.util.Utils;
 import me.xiaopan.easy.android.util.ViewUtils;
 import me.xiaopan.easy.android.util.camera.AutoFocusManager;
+import me.xiaopan.easy.android.util.camera.CameraManager;
 import me.xiaopan.easy.android.util.camera.CameraOptimalSizeCalculator;
 import me.xiaopan.easy.android.util.camera.CameraUtils;
 import me.xiaopan.easy.barcode.DecodeThread.DecodeListener;
@@ -130,7 +130,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		/* 初始化 */
 		handler = new Handler();
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), this);
-		cameraManager.setFocusIntervalTime(1000);
 		cameraManager.setDebugMode(true);
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
