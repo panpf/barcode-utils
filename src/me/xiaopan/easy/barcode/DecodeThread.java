@@ -4,9 +4,11 @@ import java.io.ByteArrayOutputStream;
 
 import me.xiaopan.easy.android.util.camera.CameraUtils;
 import me.xiaopan.easy.java.util.BoundedQueue;
+import me.xiaopan.easy.java.util.SecondChronograph;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.Camera;
+import android.util.Log;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.MultiFormatReader;
@@ -26,6 +28,7 @@ public class DecodeThread extends Thread{
 	private BoundedQueue<byte[]> yuvSources;	//yuv源数据
 	private MultiFormatReader multiFormatReader;	//多格式解码器
 	private boolean returnBitmap = true;
+	private SecondChronograph secondChronograph;
 	
 	public DecodeThread(MultiFormatReader multiFormatReader, DecodeListener decodeListener, Camera.Size cameraPreviewSize, Rect scanningAreaRect, boolean isPortrait) {
 		this.multiFormatReader = multiFormatReader;
@@ -34,6 +37,7 @@ public class DecodeThread extends Thread{
 		this.scanningAreaRect = scanningAreaRect;
 		this.isPortrait = isPortrait;
 		yuvSources = new BoundedQueue<byte[]>(1);
+		secondChronograph = new SecondChronograph();
 	}
 	
 	@Override
@@ -57,6 +61,7 @@ public class DecodeThread extends Thread{
 	}
 	
 	private void decode(byte[] yuvSource){
+		secondChronograph.count();
 		/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
 		int previewWidth = cameraPreviewSize.width;
 		int previewHeight = cameraPreviewSize.height;
@@ -80,6 +85,7 @@ public class DecodeThread extends Thread{
 		
 		/* 解码结果处理 */
 		if (decodeResult != null) {
+			Log.d("DecodeThread", "解码成功，条码："+decodeResult.getText()+"; 耗时："+secondChronograph.count().getIntervalMillis()+"毫秒");
 			byte[] bitmapData = null;
 			float scaleFactor = 0.0f;
 			if(isReturnBitmap()){
@@ -95,6 +101,7 @@ public class DecodeThread extends Thread{
 			}
 			decodeListener.onDecodeSuccess(decodeResult, bitmapData, scaleFactor);
 		} else {
+			Log.d("DecodeThread", "解码失败， 耗时："+secondChronograph.count().getIntervalMillis()+"毫秒");
 			decodeListener.onDecodeFailure();
 		}
 	}
