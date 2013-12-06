@@ -39,65 +39,63 @@ public class DecodeThread extends Thread{
 	@Override
 	public void run(){
 		running = true;
-		if(decodeListener != null){
-			byte[] yuvSource;
-			while(running){
-				yuvSource = yuvSources.poll();
-				if(yuvSource != null){
-					/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
-					int previewWidth = cameraPreviewSize.width;
-					int previewHeight = cameraPreviewSize.height;
-					if (isPortrait) {
-						yuvSource = CameraUtils.yuvLandscapeToPortrait(yuvSource, previewWidth, previewHeight);
-						previewWidth = previewWidth + previewHeight;
-						previewHeight = previewWidth - previewHeight;
-						previewWidth = previewWidth - previewHeight;
-					}
-					
-					/* 解码 */
-					Result decodeResult = null;
-					PlanarYUVLuminanceSource planarYUVLuminanceSource = new PlanarYUVLuminanceSource(yuvSource, previewWidth, previewHeight, scanningAreaRect.left, scanningAreaRect.top, scanningAreaRect.width(), scanningAreaRect.height(), false);
+		byte[] yuvSource;
+		while(running){
+			yuvSource = yuvSources.poll();
+			if(yuvSource != null){
+				decode(yuvSource);
+			}else{
+				synchronized (yuvSources) {
 					try {
-						decodeResult = multiFormatReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(planarYUVLuminanceSource)));
-					} catch (Exception re) {
-						re.printStackTrace();
-					} finally {
-						multiFormatReader.reset();
-					}
-					
-					/* 解码结果处理 */
-					if (decodeResult != null) {
-						if(decodeListener != null){
-							byte[] bitmapData = null;
-							float scaleFactor = 0.0f;
-							if(isReturnBitmap()){
-								int[] pixels = planarYUVLuminanceSource.renderThumbnail();
-								int width = planarYUVLuminanceSource.getThumbnailWidth();
-								int height = planarYUVLuminanceSource.getThumbnailHeight();
-								Bitmap bitmap = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
-								ByteArrayOutputStream out = new ByteArrayOutputStream();    
-								bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-								bitmap.recycle();
-								bitmapData = out.toByteArray();
-								scaleFactor = (float) width / planarYUVLuminanceSource.getWidth();
-							}
-							decodeListener.onDecodeSuccess(decodeResult, bitmapData, scaleFactor);
-						}
-					} else {
-						if(decodeListener != null){
-							decodeListener.onDecodeFailure();
-						}
-					}
-				}else{
-					synchronized (yuvSources) {
-						try {
-							yuvSources.wait();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+						yuvSources.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
 			}
+		}
+	}
+	
+	private void decode(byte[] yuvSource){
+		/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
+		int previewWidth = cameraPreviewSize.width;
+		int previewHeight = cameraPreviewSize.height;
+		if (isPortrait) {
+			yuvSource = CameraUtils.yuvLandscapeToPortrait(yuvSource, previewWidth, previewHeight);
+			previewWidth = previewWidth + previewHeight;
+			previewHeight = previewWidth - previewHeight;
+			previewWidth = previewWidth - previewHeight;
+		}
+		
+		/* 解码 */
+		Result decodeResult = null;
+		PlanarYUVLuminanceSource planarYUVLuminanceSource = new PlanarYUVLuminanceSource(yuvSource, previewWidth, previewHeight, scanningAreaRect.left, scanningAreaRect.top, scanningAreaRect.width(), scanningAreaRect.height(), false);
+		try {
+			decodeResult = multiFormatReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(planarYUVLuminanceSource)));
+		} catch (Exception re) {
+			re.printStackTrace();
+		} finally {
+			multiFormatReader.reset();
+		}
+		
+		/* 解码结果处理 */
+		if (decodeResult != null) {
+			byte[] bitmapData = null;
+			float scaleFactor = 0.0f;
+			if(isReturnBitmap()){
+				int[] pixels = planarYUVLuminanceSource.renderThumbnail();
+				int width = planarYUVLuminanceSource.getThumbnailWidth();
+				int height = planarYUVLuminanceSource.getThumbnailHeight();
+				Bitmap bitmap = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
+				ByteArrayOutputStream out = new ByteArrayOutputStream();    
+				bitmap.compress(Bitmap.CompressFormat.JPEG, 50, out);
+				bitmap.recycle();
+				bitmapData = out.toByteArray();
+				scaleFactor = (float) width / planarYUVLuminanceSource.getWidth();
+			}
+			decodeListener.onDecodeSuccess(decodeResult, bitmapData, scaleFactor);
+		} else {
+			decodeListener.onDecodeFailure();
 		}
 	}
 	
