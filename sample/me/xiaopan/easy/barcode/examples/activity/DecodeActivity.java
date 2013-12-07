@@ -4,8 +4,8 @@ import me.xiaopan.easy.android.util.Utils;
 import me.xiaopan.easy.android.util.ViewUtils;
 import me.xiaopan.easy.android.util.camera.AutoFocusManager;
 import me.xiaopan.easy.android.util.camera.CameraManager;
+import me.xiaopan.easy.android.util.camera.CameraManager.CamreaBeingUsedException;
 import me.xiaopan.easy.android.util.camera.CameraOptimalSizeCalculator;
-import me.xiaopan.easy.android.util.camera.CameraUtils;
 import me.xiaopan.easy.barcode.DecodeThread.DecodeListener;
 import me.xiaopan.easy.barcode.DecodeUtils;
 import me.xiaopan.easy.barcode.Decoder;
@@ -93,7 +93,9 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		flashButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				setEnableTorckFlashMode(isChecked);
+				if(!cameraManager.setTorckFlash(isChecked)){
+					Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮功能", Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 		
@@ -139,28 +141,22 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	@Override
 	protected void onResume() {
 		super.onResume();
-		cameraManager.openBackCamera();
-		setEnableTorckFlashMode(flashButton.isChecked());
+		try {
+			cameraManager.openBackCamera();
+			if(!cameraManager.setTorckFlash(flashButton.isChecked())){
+				Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮功能", Toast.LENGTH_SHORT).show();
+			}
+		} catch (CamreaBeingUsedException e) {
+			e.printStackTrace();
+			Toast.makeText(getBaseContext(), "无法打开您的摄像头，请确保摄像头没有被其它程序占用", Toast.LENGTH_SHORT).show();
+			finish();
+		}
 	}	
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
 		cameraManager.release();
-	}
-
-	@Override
-	protected void onDestroy() {
-		cameraManager = null;
-		if(soundPool != null){
-			soundPool.release();
-			soundPool = null;
-		}
-		if(decoder != null){
-			decoder.release();
-			decoder = null;
-		}
-		super.onDestroy();
 	}
 
 	@Override
@@ -188,13 +184,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		}
 		
 		autoFocusManager.setCamera(camera);
-	}
-
-	@Override
-	public void onOpenCameraException(Exception e) {
-		e.printStackTrace();
-		Toast.makeText(getBaseContext(), "无法打开您的摄像头，请确保摄像头没有被其它程序占用", Toast.LENGTH_SHORT).show();
-		finish();
 	}
 
 	@Override
@@ -282,25 +271,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		}
 	}
 	
-	/**
-	 * 设置是否激活常亮闪光模式
-	 * @param enable
-	 */
-	private void setEnableTorckFlashMode(boolean enable){
-		if(cameraManager != null){
-			if(enable){
-				if(CameraUtils.isSupportFlashMode(cameraManager.getCamera(), Camera.Parameters.FLASH_MODE_TORCH)){
-					cameraManager.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-				}else{
-					Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮功能", Toast.LENGTH_SHORT).show();
-					flashButton.setChecked(false);
-				}
-			}else{
-				cameraManager.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-			}
-		}
-	}
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(resultCode == RESULT_OK){
@@ -336,5 +306,19 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 					break;
 			}
 		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		cameraManager = null;
+		if(soundPool != null){
+			soundPool.release();
+			soundPool = null;
+		}
+		if(decoder != null){
+			decoder.release();
+			decoder = null;
+		}
+		super.onDestroy();
 	}
 }
