@@ -211,6 +211,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 
 	@Override
 	public void onDecodeSuccess(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
+		autoFocusManager.start();
 		speedometer.count();
 		if(!modeToggleButton.isChecked()){//如果是单扫模式
 			/* 停止解码，然后播放音效并震动 */
