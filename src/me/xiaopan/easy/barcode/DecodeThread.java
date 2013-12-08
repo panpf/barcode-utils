@@ -12,7 +12,7 @@ import com.google.zxing.DecodeHintType;
 /**
  * 解码线程
  */
-public class DecodeThread extends Thread{
+class DecodeThread extends Thread{
 	private boolean isPortrait;
 	private Rect scanningAreaRect;
 	private Camera.Size cameraPreviewSize;
@@ -42,11 +42,26 @@ public class DecodeThread extends Thread{
 	 * 获取解码处理器
 	 * @return
 	 */
-	public DecodeHandler getDecodeHandler() {
+	private DecodeHandler getDecodeHandler() {
 		try {
 			handlerInitLatch.await();
 		} catch (InterruptedException ie) {
 		}
 		return decodeHandler;
+	}
+	
+	/**
+	 * 解码
+	 * @param data 源数据
+	 */
+	public void decode(byte[] data) {
+		getDecodeHandler().sendDecodeMessage(data);
+	}
+	
+	/**
+	 * 释放
+	 */
+	public void release(){
+		getDecodeHandler().sendQuitMessage();
 	}
 }

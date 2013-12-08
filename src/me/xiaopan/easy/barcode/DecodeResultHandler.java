@@ -25,7 +25,7 @@ import com.google.zxing.Result;
 /**
  * 解码结果处理器
  */
-public class DecodeResultHandler extends Handler {
+class DecodeResultHandler extends Handler {
 	public static final int MESSAGE_WHAT_DECODE_SUCCESS = 4567890;
 	public static final int MESSAGE_WHAT_DECODE_FAILURE = 4567891;
 	public static final String PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP = "PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP";

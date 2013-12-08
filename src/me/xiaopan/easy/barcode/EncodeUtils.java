@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.util.EnumMap;
 import java.util.Map;
 
-import me.xiaopan.easy.android.util.BitmapUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
@@ -72,13 +71,13 @@ public class EncodeUtils {
 					errorCorrectionLevel = getErrorCorrectionLevel((float) logoWidth/(float) width);
 					if(errorCorrectionLevel == null){
 						errorCorrectionLevel = ErrorCorrectionLevel.H;
-						logoBitmap = BitmapUtils.scaleByWidth(logoBitmap, (int) (width * 0.3f));
+						logoBitmap = RequiredUtils.scaleByWidth(logoBitmap, (int) (width * 0.3f));
 					}
 				}else{
 					errorCorrectionLevel = getErrorCorrectionLevel((float) logoHeight/(float) height);
 					if(errorCorrectionLevel == null){
 						errorCorrectionLevel = ErrorCorrectionLevel.H;
-						logoBitmap = BitmapUtils.scaleByHeight(logoBitmap, (int) (height * 0.3f));
+						logoBitmap = RequiredUtils.scaleByHeight(logoBitmap, (int) (height * 0.3f));
 					}
 				}
 				hints.put(EncodeHintType.ERROR_CORRECTION, errorCorrectionLevel);

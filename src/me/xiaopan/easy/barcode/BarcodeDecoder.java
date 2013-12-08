@@ -34,42 +34,17 @@ import com.google.zxing.ResultPointCallback;
  */
 public class BarcodeDecoder{
 	private boolean running = true;	//运行中
-	private boolean returnBitmap = true;
-	private boolean debugMode;
-	private boolean continuousScanMode;
-	private String logTag = BarcodeDecoder.class.getSimpleName();
+	private boolean returnBitmap = true;	//当解码成功时是否返回位图
+	private boolean debugMode;	//调试模式
+	private boolean continuousScanMode;	//连扫模式
+	private String logTag = BarcodeDecoder.class.getSimpleName();	//日志标签
 	private DecodeThread decodeThread;	//解码线程
-	private ResultPointCallback resultPointCallback;
-	private DecodeResultHandler decodeResultHandler;
+	private ResultPointCallback resultPointCallback;	//结果点回调
+	private DecodeResultHandler decodeResultHandler;	//解码结果处理器
 	
 	public BarcodeDecoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
-		if(hints == null){
-			hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
-		}
-		
-		if(!hints.containsKey(DecodeHintType.POSSIBLE_FORMATS)){
-			Vector<BarcodeFormat> decodeFormats = new Vector<BarcodeFormat>(3);
-			decodeFormats.addAll(DecodeFormatManager.ONE_D_FORMATS);
-			decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);
-			decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
-			hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
-		}
-		
-		if(!hints.containsKey(DecodeHintType.CHARACTER_SET)){
-			hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
-		}
-		
-		hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK, new ResultPointCallback() {
-			@Override
-			public void foundPossibleResultPoint(ResultPoint arg0) {
-				if(resultPointCallback != null){
-					resultPointCallback.foundPossibleResultPoint(arg0);
-				}
-			}
-		});
-		
 		decodeResultHandler = new DecodeResultHandler(decodeListener);
-		decodeThread = new DecodeThread(this, hints, cameraPreviewSize, scanningAreaRect, context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+		decodeThread = new DecodeThread(this, handleHints(hints), cameraPreviewSize, scanningAreaRect, context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		decodeThread.start();
 	}
 	
@@ -79,8 +54,7 @@ public class BarcodeDecoder{
 	 */
 	public void decode(byte[] data) {
 		if(running){
-//			decodeThread.tryDecode(sourceData);
-			decodeThread.getDecodeHandler().sendDecodeMessage(data);
+			decodeThread.decode(data);
 		}
 	}
 	
@@ -103,53 +77,130 @@ public class BarcodeDecoder{
 	 */
 	public void release(){
 		pause();
+		decodeThread.release();
 	}
 	
+	/**
+	 * 是否返回Bitmap，如果为false的话DecodeListener.onDecodeSuccess()中的bitmapByteArray参数将为null
+	 * @return
+	 */
 	public boolean isReturnBitmap() {
 		return returnBitmap;
 	}
 
+	/**
+	 * 设置是否返回Bitmap，如果为false的话DecodeListener.onDecodeSuccess()中的bitmapByteArray参数将为null
+	 * @param returnBitmap
+	 */
 	public void setReturnBitmap(boolean returnBitmap) {
 		this.returnBitmap = returnBitmap;
 	}
 	
+	/**
+	 * 是否是连扫模式
+	 * @return false：识别条码成功后会立即暂停识别；true：识别条码成功后不会暂停识别
+	 */
 	public boolean isContinuousScanMode() {
 		return continuousScanMode;
 	}
 
+	/**
+	 * 设置是否开启连扫模式
+	 * @param false：识别条码成功后会立即暂停识别；true：识别条码成功后不会暂停识别
+	 */
 	public void setContinuousScanMode(boolean continuousScanMode) {
 		this.continuousScanMode = continuousScanMode;
 	}
 
+	/**
+	 * 是否正在运行中
+	 * @return
+	 */
 	public boolean isRunning() {
 		return running;
 	}
 
-	public ResultPointCallback getResultPointCallback() {
-		return resultPointCallback;
-	}
-
+	/**
+	 * 设置结果点回调
+	 * @param resultPointCallback
+	 */
 	public void setResultPointCallback(ResultPointCallback resultPointCallback) {
 		this.resultPointCallback = resultPointCallback;
 	}
 	
-	public DecodeResultHandler getDecodeResultHandler() {
+	/**
+	 * 获取解码结果处理器
+	 * @return
+	 */
+	DecodeResultHandler getDecodeResultHandler() {
 		return decodeResultHandler;
 	}
 
+	/**
+	 * 获取日志标签
+	 * @return
+	 */
 	public String getLogTag() {
 		return logTag;
 	}
 
+	/**
+	 * 设置日志标签
+	 * @param logTag
+	 */
 	public void setLogTag(String logTag) {
 		this.logTag = logTag;
 	}
 
+	/**
+	 * 是否是调试模式
+	 * @return
+	 */
 	public boolean isDebugMode() {
 		return debugMode;
 	}
 
+	/**
+	 * 设置是否是调试模式
+	 * @param debugMode
+	 */
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
+	}
+	
+	/**
+	 * 处理解码格式
+	 * @param hints
+	 * @return
+	 */
+	private Map<DecodeHintType, Object> handleHints(Map<DecodeHintType, Object> hints){
+		if(hints == null){
+			hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
+		}
+		
+		if(!hints.containsKey(DecodeHintType.POSSIBLE_FORMATS)){
+			Vector<BarcodeFormat> decodeFormats = new Vector<BarcodeFormat>(3);
+			decodeFormats.addAll(DecodeFormatManager.ONE_D_FORMATS);
+			decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);
+			decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
+			hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
+		}
+		
+		if(!hints.containsKey(DecodeHintType.CHARACTER_SET)){
+			hints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+		}
+		
+		if(!hints.containsKey(DecodeHintType.NEED_RESULT_POINT_CALLBACK)){
+			hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK, new ResultPointCallback() {
+				@Override
+				public void foundPossibleResultPoint(ResultPoint arg0) {
+					if(resultPointCallback != null){
+						resultPointCallback.foundPossibleResultPoint(arg0);
+					}
+				}
+			});
+		}
+		
+		return hints;
 	}
 }

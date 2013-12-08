@@ -19,8 +19,6 @@ package me.xiaopan.easy.barcode;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
-import me.xiaopan.easy.android.util.camera.CameraUtils;
-import me.xiaopan.easy.java.util.SecondChronograph;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.Camera;
@@ -40,10 +38,9 @@ import com.google.zxing.common.HybridBinarizer;
 /**
  * 解码处理器
  */
-final class DecodeHandler extends Handler {
+class DecodeHandler extends Handler {
 	public static final int MESSAGE_WHAT_DECODE = 231242; 
-	public static final int MESSAGE_WHAT_QUIT = 231243; 
-	private boolean running = true;
+	public static final int MESSAGE_WHAT_QUIT = 231243;
 	private boolean isPortrait;	//是否是竖屏
 	private Rect scanningAreaRect;	//扫描框相对于预览界面的矩形
 	private Camera.Size cameraPreviewSize;	//相机预览尺寸
@@ -51,7 +48,7 @@ final class DecodeHandler extends Handler {
 	private MultiFormatReader multiFormatReader;
 	private SecondChronograph secondChronograph;
 
-	DecodeHandler(BarcodeDecoder barcodeDecoder, Map<DecodeHintType, Object> hints,  Camera.Size cameraPreviewSize, Rect scanningAreaRect, boolean isPortrait) {
+	public DecodeHandler(BarcodeDecoder barcodeDecoder, Map<DecodeHintType, Object> hints,  Camera.Size cameraPreviewSize, Rect scanningAreaRect, boolean isPortrait) {
 		this.barcodeDecoder = barcodeDecoder;
 		this.cameraPreviewSize = cameraPreviewSize;
 		this.scanningAreaRect = scanningAreaRect;
@@ -63,16 +60,16 @@ final class DecodeHandler extends Handler {
 
 	@Override
 	public void handleMessage(Message message) {
-		if (running) {
-			switch (message.what) {
-				case MESSAGE_WHAT_DECODE:
+		switch (message.what) {
+			case MESSAGE_WHAT_DECODE:
+				if (barcodeDecoder.isRunning()) {
 					decode((byte[]) message.obj);
-					break;
-				case MESSAGE_WHAT_QUIT:
-					running = false;
-					Looper.myLooper().quit();
-					break;
-			}
+				}
+				break;
+			case MESSAGE_WHAT_QUIT:
+				barcodeDecoder.pause();
+				Looper.myLooper().quit();
+				break;
 		}
 	}
 
@@ -88,7 +85,7 @@ final class DecodeHandler extends Handler {
 		int previewHeight = cameraPreviewSize.height;
 		long rotateMillis = -1;
 		if (isPortrait) {
-			data = CameraUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight);
+			data = RequiredUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight);
 			previewWidth = previewWidth + previewHeight;
 			previewHeight = previewWidth - previewHeight;
 			previewWidth = previewWidth - previewHeight;
@@ -125,7 +122,7 @@ final class DecodeHandler extends Handler {
 				bitmapMillis = secondChronograph.count().getIntervalMillis();
 			}
 			if(!barcodeDecoder.isContinuousScanMode()){
-				running = false;
+				barcodeDecoder.pause();
 			}
 			if(barcodeDecoder.isDebugMode()){
 				Log.d(barcodeDecoder.getLogTag(), "解码成功，耗时："+(rotateMillis + decodeMillis + bitmapMillis)+"毫秒"+(rotateMillis > 0?"；旋转耗时："+rotateMillis+"毫秒":"")+"；解码耗时："+decodeMillis+"毫秒"+(bitmapMillis > 0?"；图片处理耗时："+bitmapMillis+"毫秒":"")+"；条码："+result.getText());
@@ -143,14 +140,14 @@ final class DecodeHandler extends Handler {
 	 * 发送解码消息
 	 * @param data
 	 */
-	public void sendDecodeMessage(byte[] data){
+	void sendDecodeMessage(byte[] data){
 		obtainMessage(MESSAGE_WHAT_DECODE, data).sendToTarget();
 	}
 	
 	/**
 	 * 发送退出消息
 	 */
-	public void sendQuitMessage(){
+	void sendQuitMessage(){
 		obtainMessage(MESSAGE_WHAT_QUIT).sendToTarget();
 	}
 }
