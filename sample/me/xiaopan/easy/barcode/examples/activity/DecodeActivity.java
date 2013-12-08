@@ -60,6 +60,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private ScanAreaView scanAreaView;
 	private CameraManager cameraManager;
 	private AutoFocusManager autoFocusManager;
+	private Speedometer speedometer;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +136,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 		autoFocusManager = new AutoFocusManager(null);
+		speedometer = new Speedometer();
 	}
 	
 	@Override
@@ -209,6 +211,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 
 	@Override
 	public void onDecodeSuccess(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
+		speedometer.count();
 		if(!modeToggleButton.isChecked()){//如果是单扫模式
 			/* 停止解码，然后播放音效并震动 */
 			stopDecode();
@@ -229,7 +232,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 
 		/* 显示条码内容并计数加1 */
 		barcodeText.setText(result.getText());
-		numberText.setText(""+(++number));
+		numberText.setText("总数："+(++number)+"；速度："+speedometer.computePerSecondSpeed());
 	}
 
 	@Override
