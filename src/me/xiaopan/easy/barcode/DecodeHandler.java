@@ -64,9 +64,6 @@ class DecodeHandler extends Handler {
 	 * @param data
 	 */
 	private void decode(byte[] data) {
-		if(decodeThread.getBarcodeDecoder().isDebugMode()){
-			Log.e(decodeThread.getBarcodeDecoder().getLogTag(), "解码");
-		}
 		secondChronograph.count();
 
 		/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
