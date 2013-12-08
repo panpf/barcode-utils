@@ -6,9 +6,9 @@ import me.xiaopan.easy.android.util.camera.AutoFocusManager;
 import me.xiaopan.easy.android.util.camera.CameraManager;
 import me.xiaopan.easy.android.util.camera.CameraManager.CamreaBeingUsedException;
 import me.xiaopan.easy.android.util.camera.CameraOptimalSizeCalculator;
-import me.xiaopan.easy.barcode.DecodeThread.DecodeListener;
+import me.xiaopan.easy.barcode.DecodeListener;
 import me.xiaopan.easy.barcode.DecodeUtils;
-import me.xiaopan.easy.barcode.Decoder;
+import me.xiaopan.easy.barcode.HandlerDecoder;
 import me.xiaopan.easy.barcode.R;
 import me.xiaopan.easy.barcode.ScanAreaView;
 import android.app.Activity;
@@ -52,7 +52,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private View createQRCodeButton;
 	private View imageDecodeButton;
 	private Handler handler;
-	private Decoder decoder;
+	private HandlerDecoder decoder;
 	private TextView barcodeText;
 	private TextView numberText;
 	private SoundPool soundPool;
@@ -177,7 +177,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		/* 初始化解码器 */
 		if(decoder == null){
 			Size previewSize = camera.getParameters().getPreviewSize();
-			decoder = new Decoder(getBaseContext(), previewSize, 
+			decoder = new HandlerDecoder(getBaseContext(), previewSize, 
 					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
 					, null, this);
 			decoder.setResultPointCallback(this);

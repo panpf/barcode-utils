@@ -19,7 +19,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Vector;
 
-import me.xiaopan.easy.barcode.DecodeThread.DecodeListener;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -27,19 +26,22 @@ import android.hardware.Camera;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
-import com.google.zxing.MultiFormatReader;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 
 /**
  * 解码器
  */
-public class Decoder{
+public class HandlerDecoder{
 	private boolean running = true;	//运行中
-	private DecodeThread decodeThread;	//解码线程
+	private boolean returnBitmap = true;
+	private boolean debugMode;
+	private String logTag = HandlerDecoder.class.getSimpleName();
+	private HandlerDecodeThread decodeThread;	//解码线程
 	private ResultPointCallback resultPointCallback;
+	private DecodeResultHandler decodeResultHandler;
 	
-	public Decoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
+	public HandlerDecoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
 		if(hints == null){
 			hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
 		}
@@ -65,19 +67,19 @@ public class Decoder{
 			}
 		});
 		
-		MultiFormatReader multiFormatReader = new MultiFormatReader();
-		multiFormatReader.setHints(hints);
-		decodeThread = new DecodeThread(multiFormatReader, decodeListener, cameraPreviewSize, scanningAreaRect, context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+		decodeResultHandler = new DecodeResultHandler(decodeListener);
+		decodeThread = new HandlerDecodeThread(this, hints, cameraPreviewSize, scanningAreaRect, context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		decodeThread.start();
 	}
 	
 	/**
 	 * 解码
-	 * @param sourceData 源数据
+	 * @param data 源数据
 	 */
-	public void decode(byte[] sourceData) {
+	public void decode(byte[] data) {
 		if(running){
-			decodeThread.tryDecode(sourceData);
+//			decodeThread.tryDecode(sourceData);
+			decodeThread.getDecodeHandler().sendDecodeMessage(data);
 		}
 	}
 	
@@ -86,7 +88,6 @@ public class Decoder{
 	 */
 	public void pause(){
 		running = false;
-		decodeThread.pause();
 	}
 	
 	/**
@@ -101,7 +102,18 @@ public class Decoder{
 	 */
 	public void release(){
 		pause();
-		decodeThread.finish();
+	}
+	
+	public boolean isReturnBitmap() {
+		return returnBitmap;
+	}
+
+	public void setReturnBitmap(boolean returnBitmap) {
+		this.returnBitmap = returnBitmap;
+	}
+
+	public boolean isRunning() {
+		return running;
 	}
 
 	public ResultPointCallback getResultPointCallback() {
@@ -112,11 +124,23 @@ public class Decoder{
 		this.resultPointCallback = resultPointCallback;
 	}
 	
-	public boolean isReturnBitmap() {
-		return decodeThread.isReturnBitmap();
+	public DecodeResultHandler getDecodeResultHandler() {
+		return decodeResultHandler;
 	}
 
-	public void setReturnBitmap(boolean returnBitmap) {
-		decodeThread.setReturnBitmap(returnBitmap);
+	public String getLogTag() {
+		return logTag;
+	}
+
+	public void setLogTag(String logTag) {
+		this.logTag = logTag;
+	}
+
+	public boolean isDebugMode() {
+		return debugMode;
+	}
+
+	public void setDebugMode(boolean debugMode) {
+		this.debugMode = debugMode;
 	}
 }
