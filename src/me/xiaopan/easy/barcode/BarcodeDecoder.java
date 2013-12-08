@@ -30,18 +30,19 @@ import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 
 /**
- * 解码器
+ * 条码解码器
  */
-public class HandlerDecoder{
+public class BarcodeDecoder{
 	private boolean running = true;	//运行中
 	private boolean returnBitmap = true;
 	private boolean debugMode;
-	private String logTag = HandlerDecoder.class.getSimpleName();
-	private HandlerDecodeThread decodeThread;	//解码线程
+	private boolean continuousScanMode;
+	private String logTag = BarcodeDecoder.class.getSimpleName();
+	private DecodeThread decodeThread;	//解码线程
 	private ResultPointCallback resultPointCallback;
 	private DecodeResultHandler decodeResultHandler;
 	
-	public HandlerDecoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
+	public BarcodeDecoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
 		if(hints == null){
 			hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
 		}
@@ -68,7 +69,7 @@ public class HandlerDecoder{
 		});
 		
 		decodeResultHandler = new DecodeResultHandler(decodeListener);
-		decodeThread = new HandlerDecodeThread(this, hints, cameraPreviewSize, scanningAreaRect, context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+		decodeThread = new DecodeThread(this, hints, cameraPreviewSize, scanningAreaRect, context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		decodeThread.start();
 	}
 	
@@ -110,6 +111,14 @@ public class HandlerDecoder{
 
 	public void setReturnBitmap(boolean returnBitmap) {
 		this.returnBitmap = returnBitmap;
+	}
+	
+	public boolean isContinuousScanMode() {
+		return continuousScanMode;
+	}
+
+	public void setContinuousScanMode(boolean continuousScanMode) {
+		this.continuousScanMode = continuousScanMode;
 	}
 
 	public boolean isRunning() {

@@ -47,12 +47,12 @@ final class DecodeHandler extends Handler {
 	private boolean isPortrait;	//是否是竖屏
 	private Rect scanningAreaRect;	//扫描框相对于预览界面的矩形
 	private Camera.Size cameraPreviewSize;	//相机预览尺寸
-	private HandlerDecoder decoder;
+	private BarcodeDecoder barcodeDecoder;
 	private MultiFormatReader multiFormatReader;
 	private SecondChronograph secondChronograph;
 
-	DecodeHandler(HandlerDecoder decoder, Map<DecodeHintType, Object> hints,  Camera.Size cameraPreviewSize, Rect scanningAreaRect, boolean isPortrait) {
-		this.decoder = decoder;
+	DecodeHandler(BarcodeDecoder barcodeDecoder, Map<DecodeHintType, Object> hints,  Camera.Size cameraPreviewSize, Rect scanningAreaRect, boolean isPortrait) {
+		this.barcodeDecoder = barcodeDecoder;
 		this.cameraPreviewSize = cameraPreviewSize;
 		this.scanningAreaRect = scanningAreaRect;
 		this.isPortrait = isPortrait;
@@ -91,9 +91,9 @@ final class DecodeHandler extends Handler {
 			previewWidth = previewWidth + previewHeight;
 			previewHeight = previewWidth - previewHeight;
 			previewWidth = previewWidth - previewHeight;
-			if(decoder.isDebugMode()){
-				Log.d(decoder.getLogTag(), "将源数据旋转90度耗时："+secondChronograph.count().getIntervalMillis()+"毫秒");
-			}
+//			if(barcodeDecoder.isDebugMode()){
+//				Log.d(barcodeDecoder.getLogTag(), "将源数据旋转90度耗时："+secondChronograph.count().getIntervalMillis()+"毫秒");
+//			}
 		}
 		
 		/* 解码 */
@@ -111,7 +111,7 @@ final class DecodeHandler extends Handler {
 		if (result != null) {
 			byte[] bitmapData = null;
 			float scaleFactor = 0.0f;
-			if(decoder.isReturnBitmap()){
+			if(barcodeDecoder.isReturnBitmap()){
 				int[] pixels = source.renderThumbnail();
 				int width = source.getThumbnailWidth();
 				int height = source.getThumbnailHeight();
@@ -122,15 +122,18 @@ final class DecodeHandler extends Handler {
 				bitmapData = out.toByteArray();
 				scaleFactor = (float) width / source.getWidth();
 			}
-			if(decoder.isDebugMode()){
-				Log.d(decoder.getLogTag(), "解码成功，耗时："+secondChronograph.count().getIntervalMillis()+"毫秒；条码："+result.getText());
+			if(!barcodeDecoder.isContinuousScanMode()){
+				running = false;
 			}
-			decoder.getDecodeResultHandler().sendSuccessMessage(result, bitmapData, scaleFactor);
+			if(barcodeDecoder.isDebugMode()){
+				Log.d(barcodeDecoder.getLogTag(), "解码成功，耗时："+secondChronograph.count().getIntervalMillis()+"毫秒；条码："+result.getText());
+			}
+			barcodeDecoder.getDecodeResultHandler().sendSuccessMessage(result, bitmapData, scaleFactor);
 		} else {
-			if(decoder.isDebugMode()){
-				Log.w(decoder.getLogTag(), "解码失败，耗时："+secondChronograph.count().getIntervalMillis()+"毫秒");
+			if(barcodeDecoder.isDebugMode()){
+				Log.w(barcodeDecoder.getLogTag(), "解码失败，耗时："+secondChronograph.count().getIntervalMillis()+"毫秒");
 			}
-			decoder.getDecodeResultHandler().sendFailureMessage();
+			barcodeDecoder.getDecodeResultHandler().sendFailureMessage();
 		}
 	}
 	

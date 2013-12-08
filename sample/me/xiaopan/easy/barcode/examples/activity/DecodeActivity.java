@@ -6,9 +6,9 @@ import me.xiaopan.easy.android.util.camera.AutoFocusManager;
 import me.xiaopan.easy.android.util.camera.CameraManager;
 import me.xiaopan.easy.android.util.camera.CameraManager.CamreaBeingUsedException;
 import me.xiaopan.easy.android.util.camera.CameraOptimalSizeCalculator;
+import me.xiaopan.easy.barcode.BarcodeDecoder;
 import me.xiaopan.easy.barcode.DecodeListener;
 import me.xiaopan.easy.barcode.DecodeUtils;
-import me.xiaopan.easy.barcode.HandlerDecoder;
 import me.xiaopan.easy.barcode.R;
 import me.xiaopan.easy.barcode.ScanAreaView;
 import android.app.Activity;
@@ -52,7 +52,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private View createQRCodeButton;
 	private View imageDecodeButton;
 	private Handler handler;
-	private HandlerDecoder decoder;
+	private BarcodeDecoder barcodeDecoder;
 	private TextView barcodeText;
 	private TextView numberText;
 	private SoundPool soundPool;
@@ -102,7 +102,10 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		modeToggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				decoder.setReturnBitmap(!isChecked);
+				if(barcodeDecoder != null){
+					barcodeDecoder.setReturnBitmap(!isChecked);
+					barcodeDecoder.setContinuousScanMode(isChecked);
+				}
 			}
 		});
 		
@@ -175,12 +178,13 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		camera.setParameters(parameters);
 		
 		/* 初始化解码器 */
-		if(decoder == null){
+		if(barcodeDecoder == null){
 			Size previewSize = camera.getParameters().getPreviewSize();
-			decoder = new HandlerDecoder(getBaseContext(), previewSize, 
+			barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize, 
 					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
 					, null, this);
-			decoder.setResultPointCallback(this);
+			barcodeDecoder.setResultPointCallback(this);
+			barcodeDecoder.setDebugMode(true);
 		}
 		
 		autoFocusManager.setCamera(camera);
@@ -201,8 +205,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		if(decoder != null){
-			decoder.decode(data);
+		if(barcodeDecoder != null){
+			barcodeDecoder.decode(data);
 		}
 	}
 	
@@ -215,7 +219,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 
 	@Override
 	public void onDecodeSuccess(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
-		if(!modeToggleButton.isChecked()){
+		if(!barcodeDecoder.isContinuousScanMode()){
 			stopDecode();	//停止解码
 			
 			/* 播放音效 */
@@ -232,7 +236,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			@Override
 			public void run() {
 				/* 处理并显示结果图 */
-				if(!modeToggleButton.isChecked()){
+				if(!barcodeDecoder.isContinuousScanMode()){
 					Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
 					final Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 					bitmap.recycle();
@@ -253,10 +257,10 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	 * 开始解码
 	 */
 	private void startDecode(){
-		if(decoder != null){
+		if(barcodeDecoder != null){
 			scanAreaView.startRefresh();
 			autoFocusManager.start();
-			decoder.resume();
+			barcodeDecoder.resume();
 		}
 	}
 	
@@ -266,8 +270,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private void stopDecode(){
 		scanAreaView.stopRefresh();
 		autoFocusManager.stop();
-		if(decoder != null){
-			decoder.pause();
+		if(barcodeDecoder != null){
+			barcodeDecoder.pause();
 		}
 	}
 	
@@ -315,9 +319,9 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			soundPool.release();
 			soundPool = null;
 		}
-		if(decoder != null){
-			decoder.release();
-			decoder = null;
+		if(barcodeDecoder != null){
+			barcodeDecoder.release();
+			barcodeDecoder = null;
 		}
 		super.onDestroy();
 	}

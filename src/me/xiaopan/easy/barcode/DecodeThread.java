@@ -12,17 +12,17 @@ import com.google.zxing.DecodeHintType;
 /**
  * 解码线程
  */
-public class HandlerDecodeThread extends Thread{
+public class DecodeThread extends Thread{
 	private boolean isPortrait;
 	private Rect scanningAreaRect;
 	private Camera.Size cameraPreviewSize;
 	private DecodeHandler decodeHandler;
-	private HandlerDecoder decoder;
+	private BarcodeDecoder barcodeDecoder;
 	private CountDownLatch handlerInitLatch;
 	private Map<DecodeHintType, Object> hints;
 	
-	public HandlerDecodeThread(HandlerDecoder decoder, Map<DecodeHintType, Object> hints,  Camera.Size cameraPreviewSize, Rect scanningAreaRect, boolean isPortrait) {
-		this.decoder = decoder;
+	public DecodeThread(BarcodeDecoder barcodeDecoder, Map<DecodeHintType, Object> hints,  Camera.Size cameraPreviewSize, Rect scanningAreaRect, boolean isPortrait) {
+		this.barcodeDecoder = barcodeDecoder;
 		this.hints = hints;
 		this.cameraPreviewSize = cameraPreviewSize;
 		this.scanningAreaRect = scanningAreaRect;
@@ -33,7 +33,7 @@ public class HandlerDecodeThread extends Thread{
 	@Override
 	public void run(){
 		Looper.prepare();
-		decodeHandler = new DecodeHandler(decoder, hints, cameraPreviewSize, scanningAreaRect, isPortrait);
+		decodeHandler = new DecodeHandler(barcodeDecoder, hints, cameraPreviewSize, scanningAreaRect, isPortrait);
 		handlerInitLatch.countDown();
 		Looper.loop();
 	}
