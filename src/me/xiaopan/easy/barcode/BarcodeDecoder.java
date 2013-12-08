@@ -26,6 +26,7 @@ import android.hardware.Camera;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
+import com.google.zxing.MultiFormatReader;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 
@@ -34,18 +35,40 @@ import com.google.zxing.ResultPointCallback;
  */
 public class BarcodeDecoder{
 	private boolean running = true;	//运行中
+	private boolean isPortrait;	//是否是竖屏
 	private boolean returnBitmap = true;	//当解码成功时是否返回位图
 	private boolean debugMode;	//调试模式
 	private boolean continuousScanMode;	//连扫模式
+	private Rect scanningAreaRect;	//扫码区域位置
 	private String logTag = BarcodeDecoder.class.getSimpleName();	//日志标签
+	private Camera.Size cameraPreviewSize;	//相机预览尺寸
 	private DecodeThread decodeThread;	//解码线程
-	private ResultPointCallback resultPointCallback;	//结果点回调
+	private MultiFormatReader multiFormatReader;	//解码器
 	private DecodeResultHandler decodeResultHandler;	//解码结果处理器
+	private DecodePreviewCallback decodePreviewCallback;	//解码预览回调
+	private DecodeListener decodeListener;
 	
 	public BarcodeDecoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
+		this.isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+		this.cameraPreviewSize = cameraPreviewSize;
+		this.scanningAreaRect = scanningAreaRect;
+		this.decodeListener = decodeListener;
+		multiFormatReader = new MultiFormatReader();
+		multiFormatReader.setHints(handleHints(hints));
 		decodeResultHandler = new DecodeResultHandler(decodeListener);
-		decodeThread = new DecodeThread(this, handleHints(hints), cameraPreviewSize, scanningAreaRect, context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+		decodePreviewCallback = new DecodePreviewCallback(this);
+		decodeThread = new DecodeThread(this );
 		decodeThread.start();
+	}
+	
+	/**
+	 * 设置Camera
+	 * @param camera
+	 */
+	public void setCamera(Camera camera){
+		if(camera != null){
+			camera.setPreviewCallback(decodePreviewCallback);
+		}
 	}
 	
 	/**
@@ -121,14 +144,6 @@ public class BarcodeDecoder{
 	}
 
 	/**
-	 * 设置结果点回调
-	 * @param resultPointCallback
-	 */
-	public void setResultPointCallback(ResultPointCallback resultPointCallback) {
-		this.resultPointCallback = resultPointCallback;
-	}
-	
-	/**
 	 * 获取解码结果处理器
 	 * @return
 	 */
@@ -169,6 +184,62 @@ public class BarcodeDecoder{
 	}
 	
 	/**
+	 * 设置扫描区域位置
+	 * @param scanningAreaRect
+	 */
+	public void setScanningAreaRect(Rect scanningAreaRect) {
+		this.scanningAreaRect = scanningAreaRect;
+	}
+
+	/**
+	 * 设置Camera预览尺寸
+	 * @param cameraPreviewSize
+	 */
+	public void setCameraPreviewSize(Camera.Size cameraPreviewSize) {
+		this.cameraPreviewSize = cameraPreviewSize;
+	}
+	
+	/**
+	 * 是否是横屏
+	 * @return
+	 */
+	boolean isPortrait() {
+		return isPortrait;
+	}
+
+	/**
+	 * 获取扫码区域位置
+	 * @return
+	 */
+	Rect getScanningAreaRect() {
+		return scanningAreaRect;
+	}
+
+	/**
+	 * 获取相机预览尺寸
+	 * @return
+	 */
+	Camera.Size getCameraPreviewSize() {
+		return cameraPreviewSize;
+	}
+
+	/**
+	 * 获取解码器
+	 * @return
+	 */
+	public MultiFormatReader getMultiFormatReader() {
+		return multiFormatReader;
+	}
+
+	/**
+	 * 设置解码器
+	 * @param multiFormatReader
+	 */
+	public void setMultiFormatReader(MultiFormatReader multiFormatReader) {
+		this.multiFormatReader = multiFormatReader;
+	}
+
+	/**
 	 * 处理解码格式
 	 * @param hints
 	 * @return
@@ -193,9 +264,9 @@ public class BarcodeDecoder{
 		if(!hints.containsKey(DecodeHintType.NEED_RESULT_POINT_CALLBACK)){
 			hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK, new ResultPointCallback() {
 				@Override
-				public void foundPossibleResultPoint(ResultPoint arg0) {
-					if(resultPointCallback != null){
-						resultPointCallback.foundPossibleResultPoint(arg0);
+				public void foundPossibleResultPoint(ResultPoint resultPoint) {
+					if(decodeListener != null){
+						decodeListener.foundPossibleResultPoint(resultPoint);
 					}
 				}
 			});

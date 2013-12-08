@@ -16,29 +16,24 @@
 
 package me.xiaopan.easy.barcode;
 
-import com.google.zxing.Result;
-import com.google.zxing.ResultPoint;
+import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
 
 /**
- * 解码监听器
+ * 解码预览回调
  */
-public interface DecodeListener {
-	/**
-	 * 当找到可能的结果点
-	 * @param resultPoint
-	 */
-	public void foundPossibleResultPoint(ResultPoint resultPoint);
+class DecodePreviewCallback implements PreviewCallback {
+	private BarcodeDecoder barcodeDecoder;
 	
-	/**
-	 * 解码成功
-	 * @param result
-	 * @param bitmapByteArray
-	 * @param scaleFactor
-	 */
-	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactor);
+	public DecodePreviewCallback(BarcodeDecoder barcodeDecoder){
+		this.barcodeDecoder = barcodeDecoder;
+	}
 	
-	/**
-	 * 解码失败
-	 */
-	public void onDecodeFailure();
+	@Override
+	public void onPreviewFrame(byte[] data, Camera camera) {
+		if(barcodeDecoder != null){
+			barcodeDecoder.decode(data);
+		}
+	}
+
 }

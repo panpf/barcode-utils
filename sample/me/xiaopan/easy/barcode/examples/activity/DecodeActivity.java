@@ -43,7 +43,7 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 
-public class DecodeActivity extends Activity implements CameraManager.CameraCallback, Camera.PreviewCallback, ResultPointCallback, DecodeListener {
+public class DecodeActivity extends Activity implements CameraManager.CameraCallback, ResultPointCallback, DecodeListener {
 	public static final String RETURN_BARCODE_CONTENT = "RETURN_BARCODE_CONTENT";
 	private static final String STATE_FLASH_CHECKED = "STATE_FLASH_CHECKED";
 	private static final int REQUEST_CODE_GET_IMAGE = 46231;
@@ -170,8 +170,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	
 	@Override
 	public void onInitCamera(Camera camera) {
-		/* 设置预览回调和预览分辨率 */
-		camera.setPreviewCallback(this);
+		/* 设置预览分辨率 */
 		Camera.Parameters parameters = camera.getParameters();
 		Size optimalPreviewSize = new CameraOptimalSizeCalculator().getPreviewSize(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes());
 		parameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
@@ -183,15 +182,17 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize, 
 					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
 					, null, this);
-			barcodeDecoder.setResultPointCallback(this);
 			barcodeDecoder.setDebugMode(true);
 		}
+		barcodeDecoder.setCamera(camera);
 		
 		autoFocusManager.setCamera(camera);
 	}
 
 	@Override
-	public void onAutoFocus(boolean success, Camera camera) {}
+	public void onAutoFocus(boolean success, Camera camera) {
+		
+	}
 
 	@Override
 	public void onStartPreview() {
@@ -204,16 +205,9 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	}
 	
 	@Override
-	public void onPreviewFrame(byte[] data, Camera camera) {
-		if(barcodeDecoder != null){
-			barcodeDecoder.decode(data);
-		}
-	}
-	
-	@Override
-	public void foundPossibleResultPoint(ResultPoint arg0) {
+	public void foundPossibleResultPoint(ResultPoint resultPoint) {
 		if(scanAreaView != null){
-			scanAreaView.addResultPoint(arg0);
+			scanAreaView.addResultPoint(resultPoint);
 		}
 	}
 
