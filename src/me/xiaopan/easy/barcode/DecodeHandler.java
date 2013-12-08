@@ -86,14 +86,13 @@ final class DecodeHandler extends Handler {
 		/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
 		int previewWidth = cameraPreviewSize.width;
 		int previewHeight = cameraPreviewSize.height;
+		long rotateMillis = -1;
 		if (isPortrait) {
 			data = CameraUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight);
 			previewWidth = previewWidth + previewHeight;
 			previewHeight = previewWidth - previewHeight;
 			previewWidth = previewWidth - previewHeight;
-//			if(barcodeDecoder.isDebugMode()){
-//				Log.d(barcodeDecoder.getLogTag(), "将源数据旋转90度耗时："+secondChronograph.count().getIntervalMillis()+"毫秒");
-//			}
+			rotateMillis = secondChronograph.count().getIntervalMillis();
 		}
 		
 		/* 解码 */
@@ -108,9 +107,11 @@ final class DecodeHandler extends Handler {
 		}
 
 		/* 结果处理 */
+		long decodeMillis = secondChronograph.count().getIntervalMillis();
 		if (result != null) {
 			byte[] bitmapData = null;
 			float scaleFactor = 0.0f;
+			long bitmapMillis = -1;
 			if(barcodeDecoder.isReturnBitmap()){
 				int[] pixels = source.renderThumbnail();
 				int width = source.getThumbnailWidth();
@@ -121,17 +122,18 @@ final class DecodeHandler extends Handler {
 				
 				bitmapData = out.toByteArray();
 				scaleFactor = (float) width / source.getWidth();
+				bitmapMillis = secondChronograph.count().getIntervalMillis();
 			}
 			if(!barcodeDecoder.isContinuousScanMode()){
 				running = false;
 			}
 			if(barcodeDecoder.isDebugMode()){
-				Log.d(barcodeDecoder.getLogTag(), "解码成功，耗时："+secondChronograph.count().getIntervalMillis()+"毫秒；条码："+result.getText());
+				Log.d(barcodeDecoder.getLogTag(), "解码成功，耗时："+(rotateMillis + decodeMillis + bitmapMillis)+"毫秒"+(rotateMillis > 0?"；旋转耗时："+rotateMillis+"毫秒":"")+"；解码耗时："+decodeMillis+"毫秒"+(bitmapMillis > 0?"；图片处理耗时："+bitmapMillis+"毫秒":"")+"；条码："+result.getText());
 			}
 			barcodeDecoder.getDecodeResultHandler().sendSuccessMessage(result, bitmapData, scaleFactor);
 		} else {
 			if(barcodeDecoder.isDebugMode()){
-				Log.w(barcodeDecoder.getLogTag(), "解码失败，耗时："+secondChronograph.count().getIntervalMillis()+"毫秒");
+				Log.d(barcodeDecoder.getLogTag(), "解码失败，耗时："+(rotateMillis + decodeMillis)+"毫秒"+(rotateMillis > 0?"；旋转耗时："+rotateMillis+"毫秒":"")+"；解码耗时："+decodeMillis+"毫秒");
 			}
 			barcodeDecoder.getDecodeResultHandler().sendFailureMessage();
 		}
