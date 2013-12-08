@@ -29,27 +29,12 @@ class DecodeThread extends Thread{
 	 * 获取解码处理器
 	 * @return
 	 */
-	private DecodeHandler getDecodeHandler() {
+	DecodeHandler getDecodeHandler() {
 		try {
 			handlerInitLatch.await();
 		} catch (InterruptedException ie) {
 		}
 		return decodeHandler;
-	}
-	
-	/**
-	 * 解码
-	 * @param data 源数据
-	 */
-	public void decode(byte[] data) {
-		getDecodeHandler().sendDecodeMessage(data);
-	}
-	
-	/**
-	 * 释放
-	 */
-	public void release(){
-		getDecodeHandler().sendQuitMessage();
 	}
 
 	/**

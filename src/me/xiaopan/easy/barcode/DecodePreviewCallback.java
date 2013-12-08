@@ -18,6 +18,7 @@ package me.xiaopan.easy.barcode;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
+import android.util.Log;
 
 /**
  * 解码预览回调
@@ -25,15 +26,18 @@ import android.hardware.Camera.PreviewCallback;
 class DecodePreviewCallback implements PreviewCallback {
 	private BarcodeDecoder barcodeDecoder;
 	
-	public DecodePreviewCallback(BarcodeDecoder barcodeDecoder){
-		this.barcodeDecoder = barcodeDecoder;
-	}
-	
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		if(barcodeDecoder != null){
+		if(barcodeDecoder != null && barcodeDecoder.isRunning()){
+			if(barcodeDecoder.isDebugMode()){
+				Log.i(barcodeDecoder.getLogTag(), "放入");
+			}
 			barcodeDecoder.decode(data);
+			barcodeDecoder = null;
 		}
 	}
 
+	public void setBarcodeDecoder(BarcodeDecoder barcodeDecoder) {
+		this.barcodeDecoder = barcodeDecoder;
+	}
 }

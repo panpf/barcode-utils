@@ -38,6 +38,7 @@ class DecodeHandler extends Handler {
 	public static final int MESSAGE_WHAT_QUIT = 231243;
 	private DecodeThread decodeThread;
 	private SecondChronograph secondChronograph;
+	private boolean decoding;
 
 	public DecodeHandler(DecodeThread decodeThread) {
 		this.decodeThread = decodeThread;
@@ -48,7 +49,7 @@ class DecodeHandler extends Handler {
 	public void handleMessage(Message message) {
 		switch (message.what) {
 			case MESSAGE_WHAT_DECODE:
-				if (decodeThread.getBarcodeDecoder().isRunning() && message.obj != null) {
+				if (decodeThread.getBarcodeDecoder().isRunning() && !decoding && message.obj != null) {
 					decode((byte[]) message.obj);
 				}
 				break;
@@ -64,6 +65,10 @@ class DecodeHandler extends Handler {
 	 * @param data
 	 */
 	private void decode(byte[] data) {
+		decoding = true;
+		if(decodeThread.getBarcodeDecoder().isDebugMode()){
+			Log.e(decodeThread.getBarcodeDecoder().getLogTag(), "解码");
+		}
 		secondChronograph.count();
 
 		/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
@@ -120,6 +125,7 @@ class DecodeHandler extends Handler {
 			}
 			decodeThread.getBarcodeDecoder().getDecodeResultHandler().sendFailureMessage();
 		}
+		decoding = false;
 	}
 	
 	/**

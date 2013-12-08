@@ -41,12 +41,13 @@ public class BarcodeDecoder{
 	private boolean continuousScanMode;	//连扫模式
 	private Rect scanningAreaRect;	//扫码区域位置
 	private String logTag = BarcodeDecoder.class.getSimpleName();	//日志标签
+	private Camera camera;	//相机
 	private Camera.Size cameraPreviewSize;	//相机预览尺寸
 	private DecodeThread decodeThread;	//解码线程
+	private DecodeListener decodeListener;	//解码监听器
 	private MultiFormatReader multiFormatReader;	//解码器
 	private DecodeResultHandler decodeResultHandler;	//解码结果处理器
 	private DecodePreviewCallback decodePreviewCallback;	//解码预览回调
-	private DecodeListener decodeListener;
 	
 	public BarcodeDecoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
 		this.isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
@@ -55,8 +56,8 @@ public class BarcodeDecoder{
 		this.decodeListener = decodeListener;
 		multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(handleHints(hints));
-		decodeResultHandler = new DecodeResultHandler(decodeListener);
-		decodePreviewCallback = new DecodePreviewCallback(this);
+		decodeResultHandler = new DecodeResultHandler(this, decodeListener);
+		decodePreviewCallback = new DecodePreviewCallback();
 		decodeThread = new DecodeThread(this );
 		decodeThread.start();
 	}
@@ -66,8 +67,20 @@ public class BarcodeDecoder{
 	 * @param camera
 	 */
 	public void setCamera(Camera camera){
-		if(camera != null){
-			camera.setPreviewCallback(decodePreviewCallback);
+		if(this.camera != null){
+			this.camera.release();
+		}
+		this.camera = camera;
+		requestDecode();
+	}
+	
+	/**
+	 * 请求解码
+	 */
+	void requestDecode(){
+		if(camera != null && isRunning()){
+			decodePreviewCallback.setBarcodeDecoder(this);
+			camera.setOneShotPreviewCallback(decodePreviewCallback);
 		}
 	}
 	
@@ -77,7 +90,7 @@ public class BarcodeDecoder{
 	 */
 	public void decode(byte[] data) {
 		if(running){
-			decodeThread.decode(data);
+			decodeThread.getDecodeHandler().sendDecodeMessage(data);
 		}
 	}
 	
@@ -93,6 +106,7 @@ public class BarcodeDecoder{
 	 */
 	public void resume(){
 		running = true;
+		requestDecode();
 	}
 	
 	/**
@@ -100,7 +114,7 @@ public class BarcodeDecoder{
 	 */
 	public void release(){
 		pause();
-		decodeThread.release();
+		decodeThread.getDecodeHandler().sendQuitMessage();
 	}
 	
 	/**

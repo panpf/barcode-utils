@@ -30,10 +30,11 @@ class DecodeResultHandler extends Handler {
 	public static final int MESSAGE_WHAT_DECODE_FAILURE = 4567891;
 	public static final String PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP = "PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP";
 	public static final String PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR = "PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR";
-	
+	private BarcodeDecoder barcodeDecoder;
 	private DecodeListener decodeListener;
 	
-	public DecodeResultHandler(DecodeListener decodeListener) {
+	public DecodeResultHandler(BarcodeDecoder barcodeDecoder, DecodeListener decodeListener) {
+		this.barcodeDecoder = barcodeDecoder;
 		this.decodeListener = decodeListener;
 	}
 	
@@ -48,6 +49,7 @@ class DecodeResultHandler extends Handler {
 					decodeListener.onDecodeFailure();
 					break;
 			}
+			barcodeDecoder.requestDecode();
 		}
 	}
 	

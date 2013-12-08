@@ -93,7 +93,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		flashButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if(!cameraManager.setTorckFlash(isChecked)){
+				if(!cameraManager.setTorchFlash(isChecked)){
 					Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮功能", Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -146,7 +146,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		super.onResume();
 		try {
 			cameraManager.openBackCamera();
-			if(!cameraManager.setTorckFlash(flashButton.isChecked())){
+			if(!cameraManager.setTorchFlash(flashButton.isChecked())){
 				Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮功能", Toast.LENGTH_SHORT).show();
 			}
 		} catch (CamreaBeingUsedException e) {
