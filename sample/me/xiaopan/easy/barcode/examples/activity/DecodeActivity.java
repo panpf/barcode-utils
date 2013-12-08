@@ -24,7 +24,6 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -51,7 +50,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	private int number;
 	private View createQRCodeButton;
 	private View imageDecodeButton;
-	private Handler handler;
 	private BarcodeDecoder barcodeDecoder;
 	private TextView barcodeText;
 	private TextView numberText;
@@ -104,7 +102,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if(barcodeDecoder != null){
 					barcodeDecoder.setReturnBitmap(!isChecked);
-					barcodeDecoder.setContinuousScanMode(isChecked);
 				}
 			}
 		});
@@ -133,7 +130,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		}
 		
 		/* 初始化 */
-		handler = new Handler();
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), this);
 		cameraManager.setDebugMode(true);
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
@@ -213,34 +209,27 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 
 	@Override
 	public void onDecodeSuccess(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
-		if(!barcodeDecoder.isContinuousScanMode()){
-			stopDecode();	//停止解码
-			
-			/* 播放音效 */
+		if(!modeToggleButton.isChecked()){//如果是单扫模式
+			/* 停止解码，然后播放音效并震动 */
+			stopDecode();
 			AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 			if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
 				float volume = (float) (((float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / 15) / 3.0);
 				soundPool.play(beepId, volume, volume, 100, 0, 1);
 			}
+			((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(200);
+			
+			/* 将返回的位图绘制在扫描区上 */
+			Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
+			final Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+			bitmap.recycle();
+			DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
+			scanAreaView.drawResultBitmap(newBitmap);
 		}
 
-		((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(200);//发出震动提示
-
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				/* 处理并显示结果图 */
-				if(!barcodeDecoder.isContinuousScanMode()){
-					Bitmap bitmap = BitmapFactory.decodeByteArray(barcodeBitmapByteArray, 0, barcodeBitmapByteArray.length);
-					final Bitmap newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-					bitmap.recycle();
-					DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
-					scanAreaView.drawResultBitmap(newBitmap);
-				}
-				barcodeText.setText(result.getText());
-				numberText.setText(""+(++number));
-			}
-		});
+		/* 显示条码内容并计数加1 */
+		barcodeText.setText(result.getText());
+		numberText.setText(""+(++number));
 	}
 
 	@Override

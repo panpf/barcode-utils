@@ -38,7 +38,6 @@ public class BarcodeDecoder{
 	private boolean isPortrait;	//是否是竖屏
 	private boolean returnBitmap = true;	//当解码成功时是否返回位图
 	private boolean debugMode;	//调试模式
-	private boolean continuousScanMode;	//连扫模式
 	private Rect scanningAreaRect;	//扫码区域位置
 	private String logTag = BarcodeDecoder.class.getSimpleName();	//日志标签
 	private Camera camera;	//相机
@@ -78,7 +77,7 @@ public class BarcodeDecoder{
 	 * 请求解码
 	 */
 	void requestDecode(){
-		if(camera != null && isRunning()){
+		if(camera != null && running){
 			decodePreviewCallback.setBarcodeDecoder(this);
 			camera.setOneShotPreviewCallback(decodePreviewCallback);
 		}
@@ -113,6 +112,9 @@ public class BarcodeDecoder{
 	 * 释放，请务必在Activity的onDestory()中调用此方法来释放Decoder所拥用的线程
 	 */
 	public void release(){
+		if(camera != null){
+			camera = null;
+		}
 		pause();
 		decodeThread.getDecodeHandler().sendQuitMessage();
 	}
@@ -133,22 +135,6 @@ public class BarcodeDecoder{
 		this.returnBitmap = returnBitmap;
 	}
 	
-	/**
-	 * 是否是连扫模式
-	 * @return false：识别条码成功后会立即暂停识别；true：识别条码成功后不会暂停识别
-	 */
-	public boolean isContinuousScanMode() {
-		return continuousScanMode;
-	}
-
-	/**
-	 * 设置是否开启连扫模式
-	 * @param false：识别条码成功后会立即暂停识别；true：识别条码成功后不会暂停识别
-	 */
-	public void setContinuousScanMode(boolean continuousScanMode) {
-		this.continuousScanMode = continuousScanMode;
-	}
-
 	/**
 	 * 是否正在运行中
 	 * @return

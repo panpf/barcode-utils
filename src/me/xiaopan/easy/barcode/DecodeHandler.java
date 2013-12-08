@@ -38,7 +38,6 @@ class DecodeHandler extends Handler {
 	public static final int MESSAGE_WHAT_QUIT = 231243;
 	private DecodeThread decodeThread;
 	private SecondChronograph secondChronograph;
-	private boolean decoding;
 
 	public DecodeHandler(DecodeThread decodeThread) {
 		this.decodeThread = decodeThread;
@@ -49,7 +48,7 @@ class DecodeHandler extends Handler {
 	public void handleMessage(Message message) {
 		switch (message.what) {
 			case MESSAGE_WHAT_DECODE:
-				if (decodeThread.getBarcodeDecoder().isRunning() && !decoding && message.obj != null) {
+				if (decodeThread.getBarcodeDecoder().isRunning() && message.obj != null) {
 					decode((byte[]) message.obj);
 				}
 				break;
@@ -65,7 +64,6 @@ class DecodeHandler extends Handler {
 	 * @param data
 	 */
 	private void decode(byte[] data) {
-		decoding = true;
 		if(decodeThread.getBarcodeDecoder().isDebugMode()){
 			Log.e(decodeThread.getBarcodeDecoder().getLogTag(), "解码");
 		}
@@ -112,9 +110,6 @@ class DecodeHandler extends Handler {
 				scaleFactor = (float) width / source.getWidth();
 				bitmapMillis = secondChronograph.count().getIntervalMillis();
 			}
-			if(!decodeThread.getBarcodeDecoder().isContinuousScanMode()){
-				decodeThread.getBarcodeDecoder().pause();
-			}
 			if(decodeThread.getBarcodeDecoder().isDebugMode()){
 				Log.d(decodeThread.getBarcodeDecoder().getLogTag(), "解码成功，耗时："+(rotateMillis + decodeMillis + bitmapMillis)+"毫秒"+(rotateMillis > 0?"；旋转耗时："+rotateMillis+"毫秒":"")+"；解码耗时："+decodeMillis+"毫秒"+(bitmapMillis > 0?"；图片处理耗时："+bitmapMillis+"毫秒":"")+"；条码："+result.getText());
 			}
@@ -125,7 +120,6 @@ class DecodeHandler extends Handler {
 			}
 			decodeThread.getBarcodeDecoder().getDecodeResultHandler().sendFailureMessage();
 		}
-		decoding = false;
 	}
 	
 	/**
