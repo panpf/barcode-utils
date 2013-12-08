@@ -48,7 +48,7 @@ class DecodeHandler extends Handler {
 	public void handleMessage(Message message) {
 		switch (message.what) {
 			case MESSAGE_WHAT_DECODE:
-				if (decodeThread.getBarcodeDecoder().isRunning()) {
+				if (decodeThread.getBarcodeDecoder().isRunning() && message.obj != null) {
 					decode((byte[]) message.obj);
 				}
 				break;

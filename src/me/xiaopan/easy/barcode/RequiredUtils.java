@@ -36,6 +36,7 @@ class RequiredUtils {
 		}
 		return rotatedData;
 	}
+	
 	/**
 	 * 缩放处理
 	 * @param bitmap 原图
