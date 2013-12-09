@@ -95,7 +95,7 @@ public class BarcodeDecoder{
 	 * 解码
 	 * @param data 源数据
 	 */
-	public void decode(byte[] data) {
+	void decode(byte[] data) {
 		if(running){
 			decodeThread.getDecodeHandler().sendDecodeMessage(data);
 		}
