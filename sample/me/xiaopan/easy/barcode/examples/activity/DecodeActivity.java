@@ -144,7 +144,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 	protected void onResume() {
 		super.onResume();
 		try {
-			cameraManager.openBackCamera();
+			cameraManager.openBackCamera(true);
 			if(!cameraManager.setTorchFlash(flashButton.isChecked())){
 				Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮功能", Toast.LENGTH_SHORT).show();
 			}
