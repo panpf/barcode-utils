@@ -70,14 +70,6 @@ public class BarcodeDecoder{
 	}
 	
 	/**
-	 * 设置Camera
-	 * @param camera
-	 */
-	public void setCamera(Camera camera){
-		this.camera = camera;
-	}
-	
-	/**
 	 * 请求解码
 	 */
 	void requestDecode(){
@@ -102,12 +94,14 @@ public class BarcodeDecoder{
 	 */
 	public void stop(){
 		running = false;
+		camera = null;
 	}
 	
 	/**
 	 * 启动解码
 	 */
-	public void start(){
+	public void start(Camera camera){
+		this.camera = camera;
 		running = true;
 		requestDecode();
 	}
@@ -116,9 +110,6 @@ public class BarcodeDecoder{
 	 * 释放，请务必在Activity的onDestory()中调用此方法来释放Decoder所拥用的线程
 	 */
 	public void release(){
-		if(camera != null){
-			camera = null;
-		}
 		stop();
 		decodeThread.getDecodeHandler().sendQuitMessage();
 	}

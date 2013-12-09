@@ -182,7 +182,6 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 			barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, this);
 			barcodeDecoder.setDebugMode(true);
 		}
-		barcodeDecoder.setCamera(camera);
 		
 		autoFocusManager.setCamera(camera);
 	}
@@ -247,7 +246,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		if(barcodeDecoder != null){
 			scanAreaView.startRefresh();
 			autoFocusManager.start();
-			barcodeDecoder.start();
+			barcodeDecoder.start(cameraManager.getCamera());
 		}
 	}
 	

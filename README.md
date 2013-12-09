@@ -14,7 +14,6 @@ if(barcodeDecoder == null){
 	barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, new MyDecodeListener());
 	barcodeDecoder.setDebugMode(true);
 }
-barcodeDecoder.setCamera(camera);
 ```
 
 
@@ -22,7 +21,7 @@ barcodeDecoder.setCamera(camera);
 在Camera启动预览的时候执行barcodeDecoder.start()启动解码
 ```java
 camera.startPreview();
-barcodeDecoder.start();
+barcodeDecoder.start(camera);
 ```
 
 
@@ -75,13 +74,16 @@ protected void onDestroy() {
 ###5.完整使用请参考DecodeActivity.java
 
 ##Change Log
+###1.0.8
+>* 去掉BarcodeDecoder的setCamera()方法，改由在BarcodeDecoder的start()方法中传入Camera
+
+**[easy-barcode-1.0.8.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.0.8.jar)**
+
 ###1.0.7
 >* Decoder.java改名为BarcodeDecoder.java；
 >* 优化了解码线程的实现方式使之更加稳定、节省内存，解码性能大幅提升；
 >* 将ResultPointCallback的回调移到了DecodeListener中，使用更方便；
 >* EasyBarcode不再依赖于EasyAndroid核心库。
-
-**[easy-barcode-1.0.7.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.0.7.jar)**
 
 ##License
 ```java
