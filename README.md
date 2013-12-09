@@ -11,8 +11,8 @@
 if(barcodeDecoder == null){
 	Size previewSize = camera.getParameters().getPreviewSize();
 	Rect scanAreaInPreviewRect = Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-	barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, this);
-	barcodeDecoder.setDebugMode(new MyDecodeListener());
+	barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, new MyDecodeListener());
+	barcodeDecoder.setDebugMode(true);
 }
 barcodeDecoder.setCamera(camera);
 ```
