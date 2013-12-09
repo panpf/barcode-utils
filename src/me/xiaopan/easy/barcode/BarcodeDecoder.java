@@ -38,7 +38,7 @@ public class BarcodeDecoder{
 	private boolean isPortrait;	//是否是竖屏
 	private boolean returnBitmap = true;	//当解码成功时是否返回位图
 	private boolean debugMode;	//调试模式
-	private Rect scanningAreaRect;	//扫码区域位置
+	private Rect scanAreaInPreviewRect;	//扫码区域位置
 	private String logTag = BarcodeDecoder.class.getSimpleName();	//日志标签
 	private Camera camera;	//相机
 	private Camera.Size cameraPreviewSize;	//相机预览尺寸
@@ -48,10 +48,18 @@ public class BarcodeDecoder{
 	private DecodeResultHandler decodeResultHandler;	//解码结果处理器
 	private DecodePreviewCallback decodePreviewCallback;	//解码预览回调
 	
-	public BarcodeDecoder(Context context, Camera.Size cameraPreviewSize, Rect scanningAreaRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
+	/**
+	 * 创建一个条码解码器
+	 * @param context 上下文
+	 * @param cameraPreviewSize 相机预览尺寸
+	 * @param scanAreaInPreviewRect 扫描区在预览图中的位置
+	 * @param hints Zxing解码器所需的一些信息，你可以在此指定解码格式、编码方式等信息，如果此参数为null，那么将解码所有支持的格式、并且编码方式默认为UFT-8
+	 * @param decodeListener 解码监听器
+	 */
+	public BarcodeDecoder(Context context, Camera.Size cameraPreviewSize, Rect scanAreaInPreviewRect, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
 		this.isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		this.cameraPreviewSize = cameraPreviewSize;
-		this.scanningAreaRect = scanningAreaRect;
+		this.scanAreaInPreviewRect = scanAreaInPreviewRect;
 		this.decodeListener = decodeListener;
 		multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(handleHints(hints));
@@ -184,11 +192,11 @@ public class BarcodeDecoder{
 	}
 	
 	/**
-	 * 设置扫描区域位置
-	 * @param scanningAreaRect
+	 * 设置扫描区域在预览图中的位置
+	 * @param scanAreaInPreviewRect
 	 */
-	public void setScanningAreaRect(Rect scanningAreaRect) {
-		this.scanningAreaRect = scanningAreaRect;
+	public void setScanAreaInPreviewRect(Rect scanAreaInPreviewRect) {
+		this.scanAreaInPreviewRect = scanAreaInPreviewRect;
 	}
 
 	/**
@@ -211,8 +219,8 @@ public class BarcodeDecoder{
 	 * 获取扫码区域位置
 	 * @return
 	 */
-	Rect getScanningAreaRect() {
-		return scanningAreaRect;
+	Rect getScanAreaInPreviewRect() {
+		return scanAreaInPreviewRect;
 	}
 
 	/**

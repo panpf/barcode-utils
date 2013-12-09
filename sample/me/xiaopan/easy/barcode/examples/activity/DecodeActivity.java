@@ -18,6 +18,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.media.AudioManager;
@@ -177,9 +178,8 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		/* 初始化解码器 */
 		if(barcodeDecoder == null){
 			Size previewSize = camera.getParameters().getPreviewSize();
-			barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize, 
-					Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-					, null, this);
+			Rect scanAreaInPreviewRect = Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+			barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, this);
 			barcodeDecoder.setDebugMode(true);
 		}
 		barcodeDecoder.setCamera(camera);

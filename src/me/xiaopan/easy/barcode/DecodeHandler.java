@@ -79,7 +79,7 @@ class DecodeHandler extends Handler {
 		}
 		
 		/* 解码 */
-		PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data, previewWidth, previewHeight, decodeThread.getBarcodeDecoder().getScanningAreaRect().left, decodeThread.getBarcodeDecoder().getScanningAreaRect().top, decodeThread.getBarcodeDecoder().getScanningAreaRect().width(), decodeThread.getBarcodeDecoder().getScanningAreaRect().height(), false);
+		PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data, previewWidth, previewHeight, decodeThread.getBarcodeDecoder().getScanAreaInPreviewRect().left, decodeThread.getBarcodeDecoder().getScanAreaInPreviewRect().top, decodeThread.getBarcodeDecoder().getScanAreaInPreviewRect().width(), decodeThread.getBarcodeDecoder().getScanAreaInPreviewRect().height(), false);
 		BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
 		Result result = null;
 		try {
