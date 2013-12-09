@@ -45,7 +45,7 @@ private class MyDecodeListener implements DecodeListener{
 你需要在Camera停止预览的时候执行barcodeDecoder.pause()暂停解码，在Camera启动预览的时候执行barcodeDecoder.resume()恢复解码
 
 ###4.释放BarcodeDecoder
-重写Activity的onDestory()方法，在方法内部释放BarcodeDecoder
+重写Activity的onDestroy()方法，在方法内部释放BarcodeDecoder
 ```java
 @Override
 protected void onDestroy() {
