@@ -74,11 +74,7 @@ public class BarcodeDecoder{
 	 * @param camera
 	 */
 	public void setCamera(Camera camera){
-		if(this.camera != null){
-			this.camera.release();
-		}
 		this.camera = camera;
-		requestDecode();
 	}
 	
 	/**
@@ -102,16 +98,16 @@ public class BarcodeDecoder{
 	}
 	
 	/**
-	 * 暂停解码
+	 * 停止解码
 	 */
-	public void pause(){
+	public void stop(){
 		running = false;
 	}
 	
 	/**
-	 * 恢复解码
+	 * 启动解码
 	 */
-	public void resume(){
+	public void start(){
 		running = true;
 		requestDecode();
 	}
@@ -123,7 +119,7 @@ public class BarcodeDecoder{
 		if(camera != null){
 			camera = null;
 		}
-		pause();
+		stop();
 		decodeThread.getDecodeHandler().sendQuitMessage();
 	}
 	

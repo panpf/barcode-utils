@@ -247,7 +247,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		if(barcodeDecoder != null){
 			scanAreaView.startRefresh();
 			autoFocusManager.start();
-			barcodeDecoder.resume();
+			barcodeDecoder.start();
 		}
 	}
 	
@@ -258,7 +258,7 @@ public class DecodeActivity extends Activity implements CameraManager.CameraCall
 		scanAreaView.stopRefresh();
 		autoFocusManager.stop();
 		if(barcodeDecoder != null){
-			barcodeDecoder.pause();
+			barcodeDecoder.stop();
 		}
 	}
 	

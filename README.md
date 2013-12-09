@@ -16,7 +16,17 @@ if(barcodeDecoder == null){
 }
 barcodeDecoder.setCamera(camera);
 ```
-###2.处理解码结果以及可疑点
+
+
+###2.开始解码
+在Camera启动预览的时候执行barcodeDecoder.start()启动解码
+```java
+camera.startPreview();
+barcodeDecoder.start();
+```
+
+
+###3.处理解码结果以及可疑点
 ```java
 private class MyDecodeListener implements DecodeListener{
 	@Override
@@ -30,9 +40,9 @@ private class MyDecodeListener implements DecodeListener{
 	public void onDecodeSuccess(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
 		Toast.makeText(getBaseContext(), "条码内容："+result.getText(), Toast.LENGTH_LONG).show();
 //		如果你想在识别到条码后暂停识别就在此调用以代码
-//		barcodeDecoder.pause();
+//		barcodeDecoder.stop();
 //		当你暂停了之后需要再次识别就调用以下代码
-//		barcodeDecoder.resume();
+//		barcodeDecoder.start();
 	}
 
 	@Override
@@ -41,10 +51,16 @@ private class MyDecodeListener implements DecodeListener{
 }
 ```
 
-###3.暂停或恢复BarcodeDecoder
-你需要在Camera停止预览的时候执行barcodeDecoder.pause()暂停解码，在Camera启动预览的时候执行barcodeDecoder.resume()恢复解码
 
-###4.释放BarcodeDecoder
+###4.停止解码
+在Camera停止预览的时候执行barcodeDecoder.stop()停止解码
+```java
+camera.stopPreview();
+barcodeDecoder.stop();
+```
+
+
+###5.释放BarcodeDecoder
 重写Activity的onDestroy()方法，在方法内部释放BarcodeDecoder
 ```java
 @Override

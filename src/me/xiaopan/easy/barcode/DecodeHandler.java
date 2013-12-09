@@ -53,7 +53,7 @@ class DecodeHandler extends Handler {
 				}
 				break;
 			case MESSAGE_WHAT_QUIT:
-				decodeThread.getBarcodeDecoder().pause();
+				decodeThread.getBarcodeDecoder().stop();
 				Looper.myLooper().quit();
 				break;
 		}
