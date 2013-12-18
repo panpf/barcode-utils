@@ -5,29 +5,29 @@
 
 ##Usage Guide
 ###1.创建BarcodeScanner
-在初始化Camera的时候创建BarcodeScanner
+在onCreate()方法中创建BarcodeScanner
 ```java
-/* 初始化解码器 */
-if(barcodeScanner == null){
-	Size previewSize = camera.getParameters().getPreviewSize();
-	Rect scanAreaInPreviewRect = Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-	barcodeScanner = new BarcodeScanner(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, new MyBarcodeScanListener());
-	barcodeScanner.setDebugMode(true);
-}
+//创建一个支持所有格式，编码方式为"UTF-8"并且默认扫描区域为全屏的条码扫描器
+barcodeScanner = new BarcodeScanner(getBaseContext(), this);
+barcodeScanner.setDebugMode(true);
 ```
-
+默认扫描区域是全屏的，但是你想自定义扫描区域的话就调用barcodeScanner.setScanAreaRectInPreview(Rect)方法设置扫描区域
 
 ###2.开始解码
-在Camera启动预览的时候执行barcodeScanner.start()启动解码
+在需要启动解码的时候调用barcodeScanner.start(Camera)方法即可启动解码，但是要注意在调用此方法之前Camera必须已经启动预览
 ```java
-camera.startPreview();
 barcodeScanner.start(camera);
 ```
 
 
-###3.处理解码结果以及可疑点
+###3.处理解码结果以及可疑点登回调事件
 ```java
 private class MyBarcodeScanListener implements BarcodeScanListener{
+	@Override
+	public void onStartScan() {
+		//启动扫描
+	}
+
 	@Override
 	public void onFoundPossibleResultPoint(ResultPoint resultPoint) {
 //		你可以在这里将可疑点绘制到你的界面上
@@ -47,20 +47,29 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 	@Override
 	public void onUnfoundBarcode() {
 	}
+
+	@Override
+	public void onStopScan() {
+		//停止扫描
+	}
+
+	@Override
+	public void onRelease() {
+		//释放
+	}
 }
 ```
 
 
 ###4.停止解码
-在Camera停止预览的时候执行barcodeScanner.stop()停止解码
+在需要停止解码的时候调用barcodeScanner.stop()即可停止解码
 ```java
-camera.stopPreview();
 barcodeScanner.stop();
 ```
 
 
 ###5.释放BarcodeScanner
-重写Activity的onDestroy()方法，在方法内部释放BarcodeScanner
+在需要释放的时候调用barcodeScanner.release()方法即可释放，一般情况下建议重写Activity的onDestroy()方法，在onDestroy()方法内部释放BarcodeScanner，但是当已经释放了之后再去调用start()方法则会抛出IllegalStateException异常
 ```java
 @Override
 protected void onDestroy() {

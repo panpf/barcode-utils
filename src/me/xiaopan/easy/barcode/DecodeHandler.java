@@ -62,7 +62,7 @@ class DecodeHandler extends Handler {
 
 	/**
 	 * 解码
-	 * @param data
+	 * @param data 数据
 	 */
 	private void decode(byte[] data) {
 		secondChronograph.count();
@@ -70,24 +70,46 @@ class DecodeHandler extends Handler {
 		/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
 		int previewWidth = barcodeScanner.getCameraPreviewSize().width;
 		int previewHeight = barcodeScanner.getCameraPreviewSize().height;
+		Rect scanAreaInPreviewRect;
+
+        //如果当前是横屏
 		long rotateMillis = -1;
-		if (barcodeScanner.isRotationBeforeDecode() || barcodeScanner.isVertical()) {
-			data = RequiredUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight);
-			previewWidth = previewWidth + previewHeight;
-			previewHeight = previewWidth - previewHeight;
-			previewWidth = previewWidth - previewHeight;
-			rotateMillis = secondChronograph.count().getIntervalMillis();
-		}
-		
-		Rect scanAreaInPreviewRect = barcodeScanner.getScanAreaInPreviewRect();
-		if(barcodeScanner.isRotationBeforeDecode()){
-			int left = scanAreaInPreviewRect.left;
-			scanAreaInPreviewRect.left = scanAreaInPreviewRect.top;
-			scanAreaInPreviewRect.top = scanAreaInPreviewRect.right;
-			scanAreaInPreviewRect.right = scanAreaInPreviewRect.bottom;
-			scanAreaInPreviewRect.bottom = left;
-		}
-		
+        if(!barcodeScanner.isVertical()){
+            scanAreaInPreviewRect = barcodeScanner.getScanAreaRectInPreview();
+            if(scanAreaInPreviewRect == null) scanAreaInPreviewRect = new Rect(0, 0, previewWidth, previewHeight);
+            if(barcodeScanner.isRotationBeforeDecodeOfLandscape()){    //如果需要强制旋转90度的话
+                data = RequiredUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight); //旋转源数据
+
+                /* 旋转坐标区 */
+                int left = scanAreaInPreviewRect.left;
+                int top = scanAreaInPreviewRect.top;
+                int right = scanAreaInPreviewRect.right;
+                int bottom = scanAreaInPreviewRect.bottom;
+                scanAreaInPreviewRect.left = previewHeight - bottom;
+                scanAreaInPreviewRect.top = left;
+                scanAreaInPreviewRect.right = previewHeight - top;
+                scanAreaInPreviewRect.bottom = right;
+
+                /* 旋转宽高 */
+                previewWidth = previewWidth + previewHeight;
+                previewHeight = previewWidth - previewHeight;
+                previewWidth = previewWidth - previewHeight;
+
+                rotateMillis = secondChronograph.count().getIntervalMillis();
+            }
+        }else{
+            data = RequiredUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight); //旋转源数据
+
+            /* 旋转宽高 */
+            previewWidth = previewWidth + previewHeight;
+            previewHeight = previewWidth - previewHeight;
+            previewWidth = previewWidth - previewHeight;
+
+            scanAreaInPreviewRect = barcodeScanner.getScanAreaRectInPreview();
+            if(scanAreaInPreviewRect == null) scanAreaInPreviewRect = new Rect(0, 0, previewWidth, previewHeight);
+            rotateMillis = secondChronograph.count().getIntervalMillis();
+        }
+
 		/* 解码 */
 		PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data, previewWidth, previewHeight, scanAreaInPreviewRect.left, scanAreaInPreviewRect.top, scanAreaInPreviewRect.width(), scanAreaInPreviewRect.height(), false);
 		BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
@@ -131,7 +153,7 @@ class DecodeHandler extends Handler {
 	
 	/**
 	 * 发送解码消息
-	 * @param data
+	 * @param data 数据
 	 */
 	void sendDecodeMessage(byte[] data){
 		obtainMessage(MESSAGE_WHAT_DECODE, data).sendToTarget();

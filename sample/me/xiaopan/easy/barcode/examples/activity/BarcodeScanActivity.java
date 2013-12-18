@@ -7,7 +7,6 @@ import me.xiaopan.easy.android.util.camera.AutoFocusManager;
 import me.xiaopan.easy.android.util.camera.CameraManager;
 import me.xiaopan.easy.android.util.camera.CameraManager.CamreaBeingUsedException;
 import me.xiaopan.easy.android.util.camera.CameraOptimalSizeCalculator;
-import me.xiaopan.easy.barcode.BarcodeFormatGroup;
 import me.xiaopan.easy.barcode.BarcodeScanListener;
 import me.xiaopan.easy.barcode.BarcodeScanner;
 import me.xiaopan.easy.barcode.DecodeUtils;
@@ -20,7 +19,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.media.AudioManager;
@@ -144,6 +142,9 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 		autoFocusManager = new AutoFocusManager(null);
 		speedometer = new Speedometer();
+
+        barcodeScanner = new BarcodeScanner(getBaseContext(), this);
+        barcodeScanner.setDebugMode(true);
 	}
 	
 	@Override
@@ -181,14 +182,10 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		parameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
 		camera.setParameters(parameters);
 		
-		/* 初始化解码器 */
-		if(barcodeScanner == null){
-			Size previewSize = camera.getParameters().getPreviewSize();
-			Rect scanAreaInPreviewRect = Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-			barcodeScanner = new BarcodeScanner(getBaseContext(), previewSize, scanAreaInPreviewRect, new BarcodeFormatGroup[]{BarcodeFormatGroup.QR_CODE_FORMATS}, this);
-			barcodeScanner.setDebugMode(true);
-		}
-		
+        //设置扫描区域
+        Size previewSize = camera.getParameters().getPreviewSize();
+        barcodeScanner.setScanAreaRectInPreview(Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE));
+
 		autoFocusManager.setCamera(camera);
 	}
 
