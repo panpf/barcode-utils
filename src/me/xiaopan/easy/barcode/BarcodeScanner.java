@@ -96,7 +96,7 @@ public class BarcodeScanner{
 	 */
 	public BarcodeScanner(Context context, BarcodeFormatGroup[] barcodeFormatGroups, String charset, BarcodeScanListener barcodeScanListener){
 		MultiFormatReader multiFormatReader = new MultiFormatReader();
-		multiFormatReader.setHints(handleHints(barcodeFormatGroups, charset));
+		multiFormatReader.setHints(createHints(barcodeFormatGroups, charset));
 		init(context, multiFormatReader, barcodeScanListener);
 	}
 	
@@ -117,7 +117,7 @@ public class BarcodeScanner{
 	 */
 	public BarcodeScanner(Context context, BarcodeScanListener barcodeScanListener){
 		MultiFormatReader multiFormatReader = new MultiFormatReader();
-		multiFormatReader.setHints(handleHints());
+		multiFormatReader.setHints(createHints());
 		init(context, multiFormatReader, barcodeScanListener);
 	}
 	
@@ -410,7 +410,7 @@ public class BarcodeScanner{
      * @param charset 编码方式
 	 * @return 解码配置集合
 	 */
-	private Map<DecodeHintType, Object> handleHints(BarcodeFormatGroup[] barcodeFormatGroups, String charset){
+	private Map<DecodeHintType, Object> createHints(BarcodeFormatGroup[] barcodeFormatGroups, String charset){
 		Map<DecodeHintType, Object> hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
 		
 		if(barcodeFormatGroups != null && barcodeFormatGroups.length > 0){
@@ -440,7 +440,7 @@ public class BarcodeScanner{
 	/**
 	 * 生成解码配置集合
 	 */
-	private Map<DecodeHintType, Object> handleHints(){
+	private Map<DecodeHintType, Object> createHints(){
 		return createHints(null);
 	}
 }
