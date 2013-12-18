@@ -23,17 +23,17 @@ import android.hardware.Camera.PreviewCallback;
  * 解码预览回调
  */
 class DecodePreviewCallback implements PreviewCallback {
-	private BarcodeDecoder barcodeDecoder;
+	private BarcodeScanner barcodeScanner;
 	
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		if(barcodeDecoder != null && barcodeDecoder.isRunning()){
-			barcodeDecoder.decode(data);
-			barcodeDecoder = null;
+		if(barcodeScanner != null && barcodeScanner.isRunning()){
+			barcodeScanner.decode(data);
+			barcodeScanner = null;
 		}
 	}
 
-	public void setBarcodeDecoder(BarcodeDecoder barcodeDecoder) {
-		this.barcodeDecoder = barcodeDecoder;
+	public void setBarcodeDecoder(BarcodeScanner barcodeScanner) {
+		this.barcodeScanner = barcodeScanner;
 	}
 }

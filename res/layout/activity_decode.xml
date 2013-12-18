@@ -33,6 +33,7 @@
        	        android:textSize="15sp" 
        	        android:textColor="#FFFFFFFF" 
        	        android:gravity="center"
+                android:autoLink="all"
                 android:text="" />
         </LinearLayout>
         

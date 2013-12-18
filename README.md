@@ -1,42 +1,42 @@
 # ![Logo](https://github.com/ixiaopan/EasyBarcode/raw/master/res/drawable-mdpi/ic_launcher.png) EasyBarcode
 
-这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能。
+这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能。目前兼容Zxing核心库版本是2.3.0，点击下载：**[zxing-core-2.3.0.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/zxing-core-2.3.0.jar)**
 
 
 ##Usage Guide
-###1.创建BarcodeDecoder
-在初始化Camera的时候创建BarcodeDecoder
+###1.创建BarcodeScanner
+在初始化Camera的时候创建BarcodeScanner
 ```java
 /* 初始化解码器 */
-if(barcodeDecoder == null){
+if(barcodeScanner == null){
 	Size previewSize = camera.getParameters().getPreviewSize();
 	Rect scanAreaInPreviewRect = Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-	barcodeDecoder = new BarcodeDecoder(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, new MyDecodeListener());
-	barcodeDecoder.setDebugMode(true);
+	barcodeScanner = new BarcodeScanner(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, new MyBarcodeScanListener());
+	barcodeScanner.setDebugMode(true);
 }
 ```
 
 
 ###2.开始解码
-在Camera启动预览的时候执行barcodeDecoder.start()启动解码
+在Camera启动预览的时候执行barcodeScanner.start()启动解码
 ```java
 camera.startPreview();
-barcodeDecoder.start(camera);
+barcodeScanner.start(camera);
 ```
 
 
 ###3.处理解码结果以及可疑点
 ```java
-private class MyDecodeListener implements DecodeListener{
+private class MyBarcodeScanListener implements BarcodeScanListener{
 	@Override
-	public void foundPossibleResultPoint(ResultPoint resultPoint) {
+	public void onFoundPossibleResultPoint(ResultPoint resultPoint) {
 //		你可以在这里将可疑点绘制到你的界面上
 //		具体如何绘制你可以参考Zxing的ViewfinderView.java的addPossibleResultPoint()方法或者参考本库中的ScanAreaView.java的addPossibleResultPoint()方法
-//		你还可以直接使用本库自带的ScanAeaView.java来作为扫描区，具体使用方式你可以参考本项目中的DecodeActivity.java
+//		你还可以直接使用本库自带的ScanAeaView.java来作为扫描区，具体使用方式你可以参考本项目中的BarcodeScanActivity.java
 	}
 
 	@Override
-	public void onDecodeSuccess(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
+	public void onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
 		Toast.makeText(getBaseContext(), "条码内容："+result.getText(), Toast.LENGTH_LONG).show();
 //		如果你想在识别到条码后暂停识别就在此调用以代码
 //		barcodeDecoder.stop();
@@ -45,39 +45,43 @@ private class MyDecodeListener implements DecodeListener{
 	}
 
 	@Override
-	public void onDecodeFailure() {
+	public void onUnfoundBarcode() {
 	}
 }
 ```
 
 
 ###4.停止解码
-在Camera停止预览的时候执行barcodeDecoder.stop()停止解码
+在Camera停止预览的时候执行barcodeScanner.stop()停止解码
 ```java
 camera.stopPreview();
-barcodeDecoder.stop();
+barcodeScanner.stop();
 ```
 
 
-###5.释放BarcodeDecoder
-重写Activity的onDestroy()方法，在方法内部释放BarcodeDecoder
+###5.释放BarcodeScanner
+重写Activity的onDestroy()方法，在方法内部释放BarcodeScanner
 ```java
 @Override
 protected void onDestroy() {
-	if(barcodeDecoder != null){
-		barcodeDecoder.release();
-		barcodeDecoder = null;
+	if(barcodeScanner != null){
+		barcodeScanner.release();
+		barcodeScanner = null;
 	}
 	super.onDestroy();
 }
 ```
-###5.完整使用请参考DecodeActivity.java
+###5.完整使用请参考BarcodeScanActivity.java
 
 ##Change Log
+###1.0.9
+>* BarcodeDecoder.java改名为BarcodeScanner.java
+>* DecodeListener.java改名为BarcodeScanListener.java，并将foundPossibleResultPoint()方法改为onFoundPossibleResultPoint()、onDecodeSuccess()方法改为onDecodeFailure()、foundPossibleResultPoint()方法改为onUnfoundBarcode()
+
+**[easy-barcode-1.0.9.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.0.9.jar)**
+
 ###1.0.8
 >* 去掉BarcodeDecoder的setCamera()方法，改由在BarcodeDecoder的start()方法中传入Camera
-
-**[easy-barcode-1.0.8.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.0.8.jar)**
 
 ###1.0.7
 >* Decoder.java改名为BarcodeDecoder.java；

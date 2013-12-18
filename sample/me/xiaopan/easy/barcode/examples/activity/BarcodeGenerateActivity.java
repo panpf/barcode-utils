@@ -18,9 +18,9 @@ import android.widget.Toast;
 import com.google.zxing.BarcodeFormat;
 
 /**
- * 编码界面
+ * 条码生成Activity
  */
-public class EncodeActivity extends Activity{
+public class BarcodeGenerateActivity extends Activity{
 	private View createButton;
 	private EditText contentEdit;
 	private ImageView qrcodeImage;

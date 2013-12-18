@@ -30,26 +30,26 @@ class DecodeResultHandler extends Handler {
 	public static final int MESSAGE_WHAT_DECODE_FAILURE = 4567891;
 	public static final String PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP = "PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP";
 	public static final String PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR = "PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR";
-	private BarcodeDecoder barcodeDecoder;
-	private DecodeListener decodeListener;
+	private BarcodeScanner barcodeScanner;
+	private BarcodeScanListener barcodeScanListener;
 	
-	public DecodeResultHandler(BarcodeDecoder barcodeDecoder, DecodeListener decodeListener) {
-		this.barcodeDecoder = barcodeDecoder;
-		this.decodeListener = decodeListener;
+	public DecodeResultHandler(BarcodeScanner barcodeScanner, BarcodeScanListener barcodeScanListener) {
+		this.barcodeScanner = barcodeScanner;
+		this.barcodeScanListener = barcodeScanListener;
 	}
 	
 	@Override
 	public void handleMessage(Message msg) {
-		if(decodeListener != null){
+		if(barcodeScanListener != null){
 			switch(msg.what){
 				case MESSAGE_WHAT_DECODE_SUCCESS : 
-					decodeListener.onDecodeSuccess((Result) msg.obj, msg.getData().getByteArray(PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP), msg.getData().getFloat(PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR));
+					barcodeScanListener.onFoundBarcode((Result) msg.obj, msg.getData().getByteArray(PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP), msg.getData().getFloat(PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR));
 					break;
 				case MESSAGE_WHAT_DECODE_FAILURE : 
-					decodeListener.onDecodeFailure();
+					barcodeScanListener.onUnfoundBarcode();
 					break;
 			}
-			barcodeDecoder.requestDecode();
+			barcodeScanner.requestDecode();
 		}
 	}
 	

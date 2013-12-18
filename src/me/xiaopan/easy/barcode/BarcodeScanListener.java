@@ -20,25 +20,25 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 
 /**
- * 解码监听器
+ * 条码扫描监听器
  */
-public interface DecodeListener {
+public interface BarcodeScanListener {
 	/**
 	 * 当找到可能的结果点
 	 * @param resultPoint
 	 */
-	public void foundPossibleResultPoint(ResultPoint resultPoint);
+	public void onFoundPossibleResultPoint(ResultPoint resultPoint);
 	
 	/**
-	 * 解码成功
+	 * 当找到条码
 	 * @param result
 	 * @param bitmapByteArray
 	 * @param scaleFactor
 	 */
-	public void onDecodeSuccess(Result result, byte[] bitmapByteArray, float scaleFactor);
+	public void onFoundBarcode(Result result, byte[] bitmapByteArray, float scaleFactor);
 	
 	/**
-	 * 解码失败
+	 * 当没有找到条码
 	 */
-	public void onDecodeFailure();
+	public void onUnfoundBarcode();
 }

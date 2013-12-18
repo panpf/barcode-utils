@@ -48,12 +48,12 @@ class DecodeHandler extends Handler {
 	public void handleMessage(Message message) {
 		switch (message.what) {
 			case MESSAGE_WHAT_DECODE:
-				if (decodeThread.getBarcodeDecoder().isRunning() && message.obj != null) {
+				if (decodeThread.getBarcodeScanner().isRunning() && message.obj != null) {
 					decode((byte[]) message.obj);
 				}
 				break;
 			case MESSAGE_WHAT_QUIT:
-				decodeThread.getBarcodeDecoder().stop();
+				decodeThread.getBarcodeScanner().stop();
 				Looper.myLooper().quit();
 				break;
 		}
@@ -67,10 +67,10 @@ class DecodeHandler extends Handler {
 		secondChronograph.count();
 
 		/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
-		int previewWidth = decodeThread.getBarcodeDecoder().getCameraPreviewSize().width;
-		int previewHeight = decodeThread.getBarcodeDecoder().getCameraPreviewSize().height;
+		int previewWidth = decodeThread.getBarcodeScanner().getCameraPreviewSize().width;
+		int previewHeight = decodeThread.getBarcodeScanner().getCameraPreviewSize().height;
 		long rotateMillis = -1;
-		if (decodeThread.getBarcodeDecoder().isPortrait()) {
+		if (decodeThread.getBarcodeScanner().isPortrait()) {
 			data = RequiredUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight);
 			previewWidth = previewWidth + previewHeight;
 			previewHeight = previewWidth - previewHeight;
@@ -79,14 +79,14 @@ class DecodeHandler extends Handler {
 		}
 		
 		/* 解码 */
-		PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data, previewWidth, previewHeight, decodeThread.getBarcodeDecoder().getScanAreaInPreviewRect().left, decodeThread.getBarcodeDecoder().getScanAreaInPreviewRect().top, decodeThread.getBarcodeDecoder().getScanAreaInPreviewRect().width(), decodeThread.getBarcodeDecoder().getScanAreaInPreviewRect().height(), false);
+		PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data, previewWidth, previewHeight, decodeThread.getBarcodeScanner().getScanAreaInPreviewRect().left, decodeThread.getBarcodeScanner().getScanAreaInPreviewRect().top, decodeThread.getBarcodeScanner().getScanAreaInPreviewRect().width(), decodeThread.getBarcodeScanner().getScanAreaInPreviewRect().height(), false);
 		BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
 		Result result = null;
 		try {
-			result = decodeThread.getBarcodeDecoder().getMultiFormatReader().decodeWithState(binaryBitmap);
+			result = decodeThread.getBarcodeScanner().getMultiFormatReader().decodeWithState(binaryBitmap);
 		} catch (ReaderException re) {
 		} finally {
-			decodeThread.getBarcodeDecoder().getMultiFormatReader().reset();
+			decodeThread.getBarcodeScanner().getMultiFormatReader().reset();
 		}
 
 		/* 结果处理 */
@@ -95,7 +95,7 @@ class DecodeHandler extends Handler {
 			byte[] bitmapData = null;
 			float scaleFactor = 0.0f;
 			long bitmapMillis = -1;
-			if(decodeThread.getBarcodeDecoder().isReturnBitmap()){
+			if(decodeThread.getBarcodeScanner().isReturnBitmap()){
 				int[] pixels = source.renderThumbnail();
 				int width = source.getThumbnailWidth();
 				int height = source.getThumbnailHeight();
@@ -107,15 +107,15 @@ class DecodeHandler extends Handler {
 				scaleFactor = (float) width / source.getWidth();
 				bitmapMillis = secondChronograph.count().getIntervalMillis();
 			}
-			if(decodeThread.getBarcodeDecoder().isDebugMode()){
-				Log.d(decodeThread.getBarcodeDecoder().getLogTag(), "解码成功，耗时："+(rotateMillis + decodeMillis + bitmapMillis)+"毫秒"+(rotateMillis > 0?"；旋转耗时："+rotateMillis+"毫秒":"")+"；解码耗时："+decodeMillis+"毫秒"+(bitmapMillis > 0?"；图片处理耗时："+bitmapMillis+"毫秒":"")+"；条码："+result.getText());
+			if(decodeThread.getBarcodeScanner().isDebugMode()){
+				Log.d(decodeThread.getBarcodeScanner().getLogTag(), "解码成功，耗时："+(rotateMillis + decodeMillis + bitmapMillis)+"毫秒"+(rotateMillis > 0?"；旋转耗时："+rotateMillis+"毫秒":"")+"；解码耗时："+decodeMillis+"毫秒"+(bitmapMillis > 0?"；图片处理耗时："+bitmapMillis+"毫秒":"")+"；条码："+result.getText());
 			}
-			decodeThread.getBarcodeDecoder().getDecodeResultHandler().sendSuccessMessage(result, bitmapData, scaleFactor);
+			decodeThread.getBarcodeScanner().getDecodeResultHandler().sendSuccessMessage(result, bitmapData, scaleFactor);
 		} else {
-			if(decodeThread.getBarcodeDecoder().isDebugMode()){
-				Log.w(decodeThread.getBarcodeDecoder().getLogTag(), "解码失败，耗时："+(rotateMillis + decodeMillis)+"毫秒"+(rotateMillis > 0?"；旋转耗时："+rotateMillis+"毫秒":"")+"；解码耗时："+decodeMillis+"毫秒");
+			if(decodeThread.getBarcodeScanner().isDebugMode()){
+				Log.w(decodeThread.getBarcodeScanner().getLogTag(), "解码失败，耗时："+(rotateMillis + decodeMillis)+"毫秒"+(rotateMillis > 0?"；旋转耗时："+rotateMillis+"毫秒":"")+"；解码耗时："+decodeMillis+"毫秒");
 			}
-			decodeThread.getBarcodeDecoder().getDecodeResultHandler().sendFailureMessage();
+			decodeThread.getBarcodeScanner().getDecodeResultHandler().sendFailureMessage();
 		}
 	}
 	

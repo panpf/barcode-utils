@@ -24,6 +24,7 @@
                 android:textSize="15sp"
                 android:textColor="#FFFFFFFF"
                 android:gravity="center"
+                android:autoLink="all"
                 android:text="" />
             <!-- 闪光灯控制按钮 -->
             <ToggleButton

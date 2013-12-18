@@ -9,11 +9,11 @@ import android.os.Looper;
  */
 class DecodeThread extends Thread{
 	private DecodeHandler decodeHandler;
-	private BarcodeDecoder barcodeDecoder;
+	private BarcodeScanner barcodeScanner;
 	private CountDownLatch handlerInitLatch;
 	
-	public DecodeThread(BarcodeDecoder barcodeDecoder) {
-		this.barcodeDecoder = barcodeDecoder;
+	public DecodeThread(BarcodeScanner barcodeDecoder) {
+		this.barcodeScanner = barcodeDecoder;
 		handlerInitLatch = new CountDownLatch(1);
 	}
 	
@@ -38,10 +38,10 @@ class DecodeThread extends Thread{
 	}
 
 	/**
-	 * 获取条码解码器
+	 * 获取条码扫描器
 	 * @return
 	 */
-	BarcodeDecoder getBarcodeDecoder() {
-		return barcodeDecoder;
+	BarcodeScanner getBarcodeScanner() {
+		return barcodeScanner;
 	}
 }
