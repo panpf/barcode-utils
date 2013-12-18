@@ -24,6 +24,11 @@ import com.google.zxing.ResultPoint;
  */
 public interface BarcodeScanListener {
 	/**
+	 * 当启动
+	 */
+	public void onStartScan();
+	
+	/**
 	 * 当找到可能的结果点
 	 * @param resultPoint
 	 */
@@ -41,4 +46,14 @@ public interface BarcodeScanListener {
 	 * 当没有找到条码
 	 */
 	public void onUnfoundBarcode();
+	
+	/**
+	 * 当停止
+	 */
+	public void onStopScan();
+	
+	/**
+	 * 当释放
+	 */
+	public void onRelease();
 }

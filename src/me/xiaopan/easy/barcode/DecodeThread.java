@@ -20,7 +20,7 @@ class DecodeThread extends Thread{
 	@Override
 	public void run(){
 		Looper.prepare();
-		decodeHandler = new DecodeHandler(this);
+		decodeHandler = new DecodeHandler(barcodeScanner);
 		handlerInitLatch.countDown();
 		Looper.loop();
 	}

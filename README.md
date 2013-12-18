@@ -77,6 +77,8 @@ protected void onDestroy() {
 ###1.0.9
 >* BarcodeDecoder.java改名为BarcodeScanner.java
 >* DecodeListener.java改名为BarcodeScanListener.java，并将foundPossibleResultPoint()方法改为onFoundPossibleResultPoint()、onDecodeSuccess()方法改为onDecodeFailure()、foundPossibleResultPoint()方法改为onUnfoundBarcode()
+>* BarcodeScanner.java新增setWhetherRotatePreview()方法，可设置在解码之前将预览图旋转90度
+>* BarcodeScanner.java新增setScanAreaRotateMode()方法，可设置当扫描区的宽度小于高度时在解码之前将预览图旋转90度
 
 **[easy-barcode-1.0.9.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.0.9.jar)**
 

@@ -1,11 +1,13 @@
 package me.xiaopan.easy.barcode.examples.activity;
 
+import me.xiaopan.easy.android.util.AndroidLogger;
 import me.xiaopan.easy.android.util.Utils;
 import me.xiaopan.easy.android.util.ViewUtils;
 import me.xiaopan.easy.android.util.camera.AutoFocusManager;
 import me.xiaopan.easy.android.util.camera.CameraManager;
 import me.xiaopan.easy.android.util.camera.CameraManager.CamreaBeingUsedException;
 import me.xiaopan.easy.android.util.camera.CameraOptimalSizeCalculator;
+import me.xiaopan.easy.barcode.BarcodeFormatGroup;
 import me.xiaopan.easy.barcode.BarcodeScanListener;
 import me.xiaopan.easy.barcode.BarcodeScanner;
 import me.xiaopan.easy.barcode.DecodeUtils;
@@ -87,7 +89,9 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		scanAreaView.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startDecode();
+				if(barcodeScanner != null){
+					barcodeScanner.start(cameraManager.getCamera());
+				}
 			}
 		});
 		
@@ -181,7 +185,7 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		if(barcodeScanner == null){
 			Size previewSize = camera.getParameters().getPreviewSize();
 			Rect scanAreaInPreviewRect = Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-			barcodeScanner = new BarcodeScanner(getBaseContext(), previewSize,  scanAreaInPreviewRect, null, this);
+			barcodeScanner = new BarcodeScanner(getBaseContext(), previewSize, scanAreaInPreviewRect, new BarcodeFormatGroup[]{BarcodeFormatGroup.QR_CODE_FORMATS}, this);
 			barcodeScanner.setDebugMode(true);
 		}
 		
@@ -195,12 +199,22 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 
 	@Override
 	public void onStartPreview() {
-		startDecode();
+		if(barcodeScanner != null){
+			barcodeScanner.start(cameraManager.getCamera());
+		}
 	}
 
 	@Override
 	public void onStopPreview() {
-		stopDecode();	
+		if(barcodeScanner != null){
+			barcodeScanner.stop();
+		}
+	}
+
+	@Override
+	public void onStartScan() {
+		scanAreaView.startRefresh();
+		autoFocusManager.start();
 	}
 	
 	@Override
@@ -216,7 +230,7 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		speedometer.count();
 		if(!modeToggleButton.isChecked()){//如果是单扫模式
 			/* 停止解码，然后播放音效并震动 */
-			stopDecode();
+			barcodeScanner.stop();
 			AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 			if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
 				float volume = (float) (((float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / 15) / 3.0);
@@ -239,30 +253,20 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 
 	@Override
 	public void onUnfoundBarcode() {
+		AndroidLogger.e("没有找到条码");
 	}
 
-	/**
-	 * 开始解码
-	 */
-	private void startDecode(){
-		if(barcodeScanner != null){
-			scanAreaView.startRefresh();
-			autoFocusManager.start();
-			barcodeScanner.start(cameraManager.getCamera());
-		}
-	}
-	
-	/**
-	 * 停止解码
-	 */
-	private void stopDecode(){
+	@Override
+	public void onStopScan() {
 		scanAreaView.stopRefresh();
 		autoFocusManager.stop();
-		if(barcodeScanner != null){
-			barcodeScanner.stop();
-		}
 	}
-	
+
+	@Override
+	public void onRelease() {
+		
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(resultCode == RESULT_OK){

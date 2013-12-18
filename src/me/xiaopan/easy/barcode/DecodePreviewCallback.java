@@ -27,13 +27,13 @@ class DecodePreviewCallback implements PreviewCallback {
 	
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		if(barcodeScanner != null && barcodeScanner.isRunning()){
-			barcodeScanner.decode(data);
+		if(barcodeScanner != null && !barcodeScanner.isReleased() && barcodeScanner.isScanning()){
+			barcodeScanner.getDecodeThread().getDecodeHandler().sendDecodeMessage(data);
 			barcodeScanner = null;
 		}
 	}
 
-	public void setBarcodeDecoder(BarcodeScanner barcodeScanner) {
+	public void setBarcodeScanner(BarcodeScanner barcodeScanner) {
 		this.barcodeScanner = barcodeScanner;
 	}
 }
