@@ -20,7 +20,7 @@ barcodeScanner.start(camera);
 ```
 
 
-###3.处理解码结果以及可疑点登回调事件
+###3.处理回调事件
 ```java
 private class MyBarcodeScanListener implements BarcodeScanListener{
 	@Override
@@ -37,15 +37,15 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 
 	@Override
 	public void onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
+		//识别到条码了，显示条码内容
 		Toast.makeText(getBaseContext(), "条码内容："+result.getText(), Toast.LENGTH_LONG).show();
-//		如果你想在识别到条码后暂停识别就在此调用以代码
-//		barcodeDecoder.stop();
-//		当你暂停了之后需要再次识别就调用以下代码
-//		barcodeDecoder.start();
+		
+//		如果你想在识别到条码后立即停止识别就在此调用stop()方法
 	}
 
 	@Override
 	public void onUnfoundBarcode() {
+		//没有识别到条码，注意：此方法会持续回调
 	}
 
 	@Override
@@ -69,7 +69,8 @@ barcodeScanner.stop();
 
 
 ###5.释放BarcodeScanner
-在需要释放的时候调用barcodeScanner.release()方法即可释放，一般情况下建议重写Activity的onDestroy()方法，在onDestroy()方法内部释放BarcodeScanner，但是当已经释放了之后再去调用start()方法则会抛出IllegalStateException异常
+在需要释放的时候调用barcodeScanner.release()方法即可释放，一般情况下建议重写Activity的onDestroy()方法，在onDestroy()方法内部释放BarcodeScanner
+注意：当已经释放了之后再去调用start()方法则会抛出IllegalStateException异常
 ```java
 @Override
 protected void onDestroy() {
@@ -83,13 +84,18 @@ protected void onDestroy() {
 ###5.完整使用请参考BarcodeScanActivity.java
 
 ##Change Log
+
+##1.1.0 **[easy-barcode-1.1.0.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.1.0.jar)**
+>* BarcodeScanListener.java新增onStartScan()、onStopScan()、onRelease()回调方法
+>* BarcodeScanner.java构造函数中去掉Camera.Size cameraPreviewSize参数和Rect scanAreaInPreviewRect参数，改为scanAreaInPreviewRect默认为全屏；cameraPreviewSize在start()方法内部设置
+>* BarcodeScanner.java增加多个构造函数，方便直接创建指定解码格式的BarcodeScanner
+>* BarcodeScanner.java去掉setWhetherRotatePreview()和setScanAreaRotateMode()方法，替换为setRotationBeforeDecodeOfLandscape()方法，此方法可控制在横屏的时候强制将预览图和扫描区Rect旋转90度再识别
+
 ###1.0.9
 >* BarcodeDecoder.java改名为BarcodeScanner.java
->* DecodeListener.java改名为BarcodeScanListener.java，并将foundPossibleResultPoint()方法改为onFoundPossibleResultPoint()、onDecodeSuccess()方法改为onDecodeFailure()、foundPossibleResultPoint()方法改为onUnfoundBarcode()
+>* DecodeListener.java改名为BarcodeScanListener.java，并将foundPossibleResultPoint()方法改为onFoundPossibleResultPoint()、onDecodeSuccess()方法改为onFoundBarcode()、foundPossibleResultPoint()方法改为onUnfoundBarcode()
 >* BarcodeScanner.java新增setWhetherRotatePreview()方法，可设置在解码之前将预览图旋转90度
 >* BarcodeScanner.java新增setScanAreaRotateMode()方法，可设置当扫描区的宽度小于高度时在解码之前将预览图旋转90度
-
-**[easy-barcode-1.0.9.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.0.9.jar)**
 
 ###1.0.8
 >* 去掉BarcodeDecoder的setCamera()方法，改由在BarcodeDecoder的start()方法中传入Camera

@@ -117,7 +117,7 @@ public class BarcodeScanner{
 	 */
 	public BarcodeScanner(Context context, BarcodeScanListener barcodeScanListener){
 		MultiFormatReader multiFormatReader = new MultiFormatReader();
-		multiFormatReader.setHints(createHints());
+		multiFormatReader.setHints(createHints(null));
 		init(context, multiFormatReader, barcodeScanListener);
 	}
 	
@@ -435,12 +435,5 @@ public class BarcodeScanner{
 			hints.put(DecodeHintType.CHARACTER_SET, charset);
 		}
 		return createHints(hints);
-	}
-
-	/**
-	 * 生成解码配置集合
-	 */
-	private Map<DecodeHintType, Object> createHints(){
-		return createHints(null);
 	}
 }
