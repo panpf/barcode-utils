@@ -1,7 +1,7 @@
 package me.xiaopan.easy.barcode.examples.activity;
 
 import me.xiaopan.easy.android.util.AndroidLogger;
-import me.xiaopan.easy.android.util.Utils;
+import me.xiaopan.easy.android.util.RectUtils;
 import me.xiaopan.easy.android.util.ViewUtils;
 import me.xiaopan.easy.android.util.camera.AutoFocusManager;
 import me.xiaopan.easy.android.util.camera.CameraManager;
@@ -184,7 +184,7 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		
         //设置扫描区域
         Size previewSize = camera.getParameters().getPreviewSize();
-        barcodeScanner.setScanAreaRectInPreview(Utils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE));
+        barcodeScanner.setScanAreaRectInPreview(RectUtils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
 
 		autoFocusManager.setCamera(camera);
 	}
