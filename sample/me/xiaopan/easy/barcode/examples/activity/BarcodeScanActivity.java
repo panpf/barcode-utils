@@ -3,6 +3,7 @@ package me.xiaopan.easy.barcode.examples.activity;
 import me.xiaopan.easy.android.util.AndroidLogger;
 import me.xiaopan.easy.android.util.RectUtils;
 import me.xiaopan.easy.android.util.ViewUtils;
+import me.xiaopan.easy.android.util.WindowUtils;
 import me.xiaopan.easy.android.util.camera.AutoFocusManager;
 import me.xiaopan.easy.android.util.camera.CameraManager;
 import me.xiaopan.easy.android.util.camera.CameraManager.CamreaBeingUsedException;
@@ -14,7 +15,6 @@ import me.xiaopan.easy.barcode.R;
 import me.xiaopan.easy.barcode.ScanAreaView;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -184,7 +184,7 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		
         //设置扫描区域
         Size previewSize = camera.getParameters().getPreviewSize();
-        barcodeScanner.setScanAreaRectInPreview(RectUtils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), getBaseContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
+        barcodeScanner.setScanAreaRectInPreview(RectUtils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), WindowUtils.isPortrait(getBaseContext())));
 
 		autoFocusManager.setCamera(camera);
 	}
