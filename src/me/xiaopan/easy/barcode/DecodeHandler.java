@@ -39,10 +39,12 @@ class DecodeHandler extends Handler {
 	public static final int MESSAGE_WHAT_QUIT = 231243;
 	private BarcodeScanner barcodeScanner;
 	private SecondChronograph secondChronograph;
+	private Rect scanAreaInPreviewRect;
 
 	public DecodeHandler(BarcodeScanner barcodeScanner) {
 		this.barcodeScanner = barcodeScanner;
 		secondChronograph = new SecondChronograph();
+		scanAreaInPreviewRect = new Rect();
 	}
 
 	@Override
@@ -70,13 +72,15 @@ class DecodeHandler extends Handler {
 		/* 初始化源数据，如果是竖屏的话就将源数据旋转90度 */
 		int previewWidth = barcodeScanner.getCameraPreviewSize().width;
 		int previewHeight = barcodeScanner.getCameraPreviewSize().height;
-		Rect scanAreaInPreviewRect;
 
         //如果当前是横屏
 		long rotateMillis = -1;
         if(!barcodeScanner.isVertical()){
-            scanAreaInPreviewRect = barcodeScanner.getScanAreaRectInPreview();
-            if(scanAreaInPreviewRect == null) scanAreaInPreviewRect = new Rect(0, 0, previewWidth, previewHeight);
+            if(barcodeScanner.getScanAreaRectInPreview() != null){
+            	scanAreaInPreviewRect.set(barcodeScanner.getScanAreaRectInPreview());
+            }else{
+            	scanAreaInPreviewRect.set(0, 0, previewWidth, previewHeight);
+            }
             if(barcodeScanner.isRotationBeforeDecodeOfLandscape()){    //如果需要强制旋转90度的话
                 data = RequiredUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight); //旋转源数据
 
@@ -105,8 +109,11 @@ class DecodeHandler extends Handler {
             previewHeight = previewWidth - previewHeight;
             previewWidth = previewWidth - previewHeight;
 
-            scanAreaInPreviewRect = barcodeScanner.getScanAreaRectInPreview();
-            if(scanAreaInPreviewRect == null) scanAreaInPreviewRect = new Rect(0, 0, previewWidth, previewHeight);
+            if(barcodeScanner.getScanAreaRectInPreview() != null){
+            	scanAreaInPreviewRect.set(barcodeScanner.getScanAreaRectInPreview());
+            }else{
+            	scanAreaInPreviewRect.set(0, 0, previewWidth, previewHeight);
+            }
             rotateMillis = secondChronograph.count().getIntervalMillis();
         }
 
