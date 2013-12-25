@@ -184,7 +184,7 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		
         //设置扫描区域
         Size previewSize = camera.getParameters().getPreviewSize();
-        barcodeScanner.setScanAreaRectInPreview(RectUtils.mappingRect(new Point(surfaceView.getWidth(), surfaceView.getHeight()), ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(previewSize.width, previewSize.height), WindowUtils.isPortrait(getBaseContext())));
+        barcodeScanner.setScanAreaRectInPreview(RectUtils.mappingRect(ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(surfaceView.getWidth(), surfaceView.getHeight()), new Point(previewSize.width, previewSize.height), WindowUtils.isPortrait(getBaseContext())));
 
 		autoFocusManager.setCamera(camera);
 	}
