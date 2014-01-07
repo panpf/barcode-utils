@@ -85,7 +85,10 @@ protected void onDestroy() {
 
 ##Change Log
 
-##1.1.1 **[easy-barcode-1.1.1.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.1.1.jar)**
+##1.1.2 **[easy-barcode-1.1.2.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.1.2.jar)**
+>* 修复当因为解码区域超出数据的范围时引发的崩溃问题
+
+##1.1.1
 >* 修复当使用setRotationBeforeDecodeOfLandscape()功能的时候会反复旋转扫描区的BUG
 
 ##1.1.0

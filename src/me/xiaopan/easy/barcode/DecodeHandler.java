@@ -26,8 +26,8 @@ import android.os.Message;
 import android.util.Log;
 
 import com.google.zxing.BinaryBitmap;
+import com.google.zxing.MultiFormatReader;
 import com.google.zxing.PlanarYUVLuminanceSource;
-import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 
@@ -118,15 +118,16 @@ class DecodeHandler extends Handler {
         }
 
 		/* 解码 */
-		PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data, previewWidth, previewHeight, scanAreaInPreviewRect.left, scanAreaInPreviewRect.top, scanAreaInPreviewRect.width(), scanAreaInPreviewRect.height(), false);
-		BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
-		Result result = null;
-		try {
-			result = barcodeScanner.getMultiFormatReader().decodeWithState(binaryBitmap);
-		} catch (ReaderException re) {
-		} finally {
-			barcodeScanner.getMultiFormatReader().reset();
-		}
+        Result result = null;
+        PlanarYUVLuminanceSource source = null;;
+    	MultiFormatReader multiFormatReader = barcodeScanner.getMultiFormatReader();
+    	try {
+    		source = new PlanarYUVLuminanceSource(data, previewWidth, previewHeight, scanAreaInPreviewRect.left, scanAreaInPreviewRect.top, scanAreaInPreviewRect.width(), scanAreaInPreviewRect.height(), false);
+    		result = multiFormatReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(source)));
+    	} catch (Throwable throwable) {
+    		throwable.printStackTrace();
+    	}
+    	multiFormatReader.reset();
 
 		/* 结果处理 */
 		long decodeMillis = secondChronograph.count().getIntervalMillis();
