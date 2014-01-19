@@ -103,13 +103,13 @@ protected void onDestroy() {
 >* 优化扫码结果处理逻辑，新逻辑为扫描到条码后立即停止扫描，如果没有扫描到条码则继续扫描
 >* 优化BarcodeScanner的Camera设置逻辑，改为直接调用setCamera()设置一次即可
 
-##1.1.2
+###1.1.2
 >* 修复当因为解码区域超出数据的范围时引发的崩溃问题
 
-##1.1.1
+###1.1.1
 >* 修复当使用setRotationBeforeDecodeOfLandscape()功能的时候会反复旋转扫描区的BUG
 
-##1.1.0
+###1.1.0
 >* BarcodeScanListener.java新增onStartScan()、onStopScan()、onRelease()回调方法
 >* BarcodeScanner.java构造函数中去掉Camera.Size cameraPreviewSize参数和Rect scanAreaInPreviewRect参数，改为scanAreaInPreviewRect默认为全屏；cameraPreviewSize在start()方法内部设置
 >* BarcodeScanner.java增加多个构造函数，方便直接创建指定解码格式的BarcodeScanner
