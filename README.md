@@ -71,13 +71,11 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 }
 ```
 
-
 ###4.停止扫描
-在需要停止解码的时候调用barcodeScanner.stop()即可停止扫描
+在需要停止解码的时候调用barcodeScanner.stop()即可停止扫描，例如：
 ```java
 barcodeScanner.stop();
 ```
-
 
 ###5.释放BarcodeScanner
 在需要释放的时候调用barcodeScanner.release()方法即可释放，一般情况下建议重写Activity的onDestroy()方法，在onDestroy()方法内部释放BarcodeScanner
@@ -92,19 +90,20 @@ protected void onDestroy() {
 	super.onDestroy();
 }
 ```
-###5.完整使用请参考BarcodeScanActivity.java
+
+完整使用示例请参考BarcodeScanActivity.java
 
 ##Depend
 >* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
 
 ##Change Log
 
-##1.2.0 **[android-barcode-scann-1.2.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/downloads/android-barcode-scann-1.2.0.jar)**
+##1.2.0 **[android-barcode-scann-1.2.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/releases/android-barcode-scann-1.2.0.jar)**
 >* 采用全新的命名规则来命名包
 >* 优化扫码结果处理逻辑，新逻辑为扫描到条码后立即停止扫描，如果没有扫描到条码则继续扫描
 >* 优化BarcodeScanner的Camera设置逻辑，改为直接调用setCamera()设置一次即可
 
-##1.1.2 **[easy-barcode-1.1.2.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/downloads/easy-barcode-1.1.2.jar)**
+##1.1.2
 >* 修复当因为解码区域超出数据的范围时引发的崩溃问题
 
 ##1.1.1
