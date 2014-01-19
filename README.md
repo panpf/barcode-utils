@@ -98,7 +98,7 @@ protected void onDestroy() {
 
 ##Change Log
 
-##1.2.0 **[android-barcode-scann-1.2.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/releases/android-barcode-scann-1.2.0.jar)**
+###1.2.0 **[android-barcode-scann-1.2.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/releases/android-barcode-scann-1.2.0.jar)**
 >* 采用全新的命名规则来命名包
 >* 优化扫码结果处理逻辑，新逻辑为扫描到条码后立即停止扫描，如果没有扫描到条码则继续扫描
 >* 优化BarcodeScanner的Camera设置逻辑，改为直接调用setCamera()设置一次即可
