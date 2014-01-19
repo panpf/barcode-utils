@@ -6,7 +6,7 @@
 ##Usage Guide
 
 ###1.创建BarcodeScanner
-在onCreate()方法中创建BarcodeScanner
+在onCreate()方法中创建BarcodeScanner，例如：
 ```java
 //创建一个支持所有格式，编码方式为"UTF-8"并且默认扫描区域为全屏的条码扫描器
 barcodeScanner = new BarcodeScanner(getBaseContext(), this);
@@ -25,8 +25,9 @@ barcodeScanner.setScanAreaRectInPreview(new Rect(100, 100, 400, 250));
 ```
         
 ###3.启动扫描
-在需要启动解码的时候调用barcodeScanner.start(Camera)方法即可启动扫描，但是要注意在调用此方法之前Camera必须已经启动预览
+在执行完camera.startPreview()后调用barcodeScanner.start()启动扫描，例如：
 ```java
+camera.startPreview();
 barcodeScanner.start();
 ```
 
