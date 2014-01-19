@@ -138,6 +138,15 @@ public class BarcodeScanner{
 	}
 	
 	/**
+	 * 设置Camera
+	 * @param camera
+	 */
+	public void setCamera(Camera camera) {
+		this.camera = camera;
+		this.cameraPreviewSize = camera.getParameters().getPreviewSize();
+	}
+
+	/**
 	 * 请求解码
 	 */
 	void requestDecode(){
@@ -151,11 +160,9 @@ public class BarcodeScanner{
 	 * 启动扫描
      * @exception java.lang.IllegalStateException 已经释放了
 	 */
-	public void start(Camera camera){
+	public void start(){
 		if(!released){
 			if(!scanning){
-				this.camera = camera;
-                cameraPreviewSize = camera.getParameters().getPreviewSize();
 				scanning = true;
 				requestDecode();
 				if(barcodeScanListener != null){
@@ -173,7 +180,6 @@ public class BarcodeScanner{
 	public void stop(){
 		if(!released && scanning){
             scanning = false;
-            camera = null;
             if(barcodeScanListener != null){
                 barcodeScanListener.onStopScan();
             }

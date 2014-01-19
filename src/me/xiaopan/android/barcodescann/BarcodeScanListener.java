@@ -24,7 +24,7 @@ import com.google.zxing.ResultPoint;
  */
 public interface BarcodeScanListener {
 	/**
-	 * 当启动
+	 * 当启动扫描
 	 */
 	public void onStartScan();
 	
@@ -48,7 +48,7 @@ public interface BarcodeScanListener {
 	public void onUnfoundBarcode();
 	
 	/**
-	 * 当停止
+	 * 当停止扫描，当扫描到条码时会在调用onFoundBarcode()之前调用此方法
 	 */
 	public void onStopScan();
 	

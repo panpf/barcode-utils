@@ -1,9 +1,10 @@
 # ![Logo](https://github.com/xiaopansky/EasyBarcode/raw/master/res/drawable-mdpi/ic_launcher.png) EasyBarcode
 
-这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能。目前兼容Zxing核心库版本是2.3.0，点击下载：**[zxing-core-2.3.0.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/zxing-core-2.3.0.jar)**
+这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能，目前兼容Zxing核心库版本是2.3.0
 
 
 ##Usage Guide
+
 ###1.创建BarcodeScanner
 在onCreate()方法中创建BarcodeScanner
 ```java
@@ -11,14 +12,23 @@
 barcodeScanner = new BarcodeScanner(getBaseContext(), this);
 barcodeScanner.setDebugMode(true);
 ```
-默认扫描区域是全屏的，但是你想自定义扫描区域的话就调用barcodeScanner.setScanAreaRectInPreview(Rect)方法设置扫描区域
 
-###2.开始解码
-在需要启动解码的时候调用barcodeScanner.start(Camera)方法即可启动解码，但是要注意在调用此方法之前Camera必须已经启动预览
+###2.设置Camera和扫描区域
+在你打开Camera以后调用setCamera()方法设置Camera，例如：
 ```java
-barcodeScanner.start(camera);
+Camera camera = Camera.open();
+barcodeScanner.setCamera(camera);
 ```
-
+默认的扫描区域是全屏的，如果你想自定义扫描区域的话就调用barcodeScanner.setScanAreaRectInPreview(Rect)方法设置扫描区域，例如：
+```java
+barcodeScanner.setScanAreaRectInPreview(new Rect(100, 100, 400, 250));
+```
+        
+###3.启动扫描
+在需要启动解码的时候调用barcodeScanner.start(Camera)方法即可启动扫描，但是要注意在调用此方法之前Camera必须已经启动预览
+```java
+barcodeScanner.start();
+```
 
 ###3.处理回调事件
 ```java
@@ -37,10 +47,10 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 
 	@Override
 	public void onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
-		//识别到条码了，显示条码内容
+//		识别到条码了，显示条码内容
 		Toast.makeText(getBaseContext(), "条码内容："+result.getText(), Toast.LENGTH_LONG).show();
 		
-//		如果你想在识别到条码后立即停止识别就在此调用stop()方法
+//		如果你想继续扫码条码就在此调用barcodeScanner.start()方法，重新启动扫描
 	}
 
 	@Override
@@ -50,7 +60,7 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 
 	@Override
 	public void onStopScan() {
-		//停止扫描
+		//停止扫描，当扫描到条码市会在调用onFoundBarcode()之前调用此方法
 	}
 
 	@Override
@@ -61,8 +71,8 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 ```
 
 
-###4.停止解码
-在需要停止解码的时候调用barcodeScanner.stop()即可停止解码
+###4.停止扫描
+在需要停止解码的时候调用barcodeScanner.stop()即可停止扫描
 ```java
 barcodeScanner.stop();
 ```
@@ -88,7 +98,12 @@ protected void onDestroy() {
 
 ##Change Log
 
-##1.1.2 **[easy-barcode-1.1.2.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/easy-barcode-1.1.2.jar)**
+##1.2.0 **[easy-barcode-1.2.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/downloads/easy-barcode-1.2.0.jar)**
+>* 采用全新的命名规则来命名包
+>* 优化扫码结果处理逻辑，新逻辑为扫描到条码后立即停止扫描，如果没有扫描到条码则继续扫描
+>* 优化BarcodeScanner的Camera设置逻辑，改为直接调用setCamera()设置一次即可
+
+##1.1.2 **[easy-barcode-1.1.2.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/downloads/easy-barcode-1.1.2.jar)**
 >* 修复当因为解码区域超出数据的范围时引发的崩溃问题
 
 ##1.1.1

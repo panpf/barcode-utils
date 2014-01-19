@@ -88,7 +88,7 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 			@Override
 			public void onClick(View v) {
 				if(barcodeScanner != null){
-					barcodeScanner.start(cameraManager.getCamera());
+					barcodeScanner.start();
 				}
 			}
 		});
@@ -182,10 +182,11 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 		parameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
 		camera.setParameters(parameters);
 		
-        //设置扫描区域
-        Size previewSize = camera.getParameters().getPreviewSize();
+        //设置相机和扫描区域
+        barcodeScanner.setCamera(camera);
+		Size previewSize = camera.getParameters().getPreviewSize();
         barcodeScanner.setScanAreaRectInPreview(RectUtils.mappingRect(ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(surfaceView.getWidth(), surfaceView.getHeight()), new Point(previewSize.width, previewSize.height), WindowUtils.isPortrait(getBaseContext())));
-
+        
 		autoFocusManager.setCamera(camera);
 	}
 
@@ -197,7 +198,7 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 	@Override
 	public void onStartPreview() {
 		if(barcodeScanner != null){
-			barcodeScanner.start(cameraManager.getCamera());
+			barcodeScanner.start();
 		}
 	}
 
@@ -223,11 +224,8 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 
 	@Override
 	public void onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
-		autoFocusManager.start();
 		speedometer.count();
 		if(!modeToggleButton.isChecked()){//如果是单扫模式
-			/* 停止解码，然后播放音效并震动 */
-			barcodeScanner.stop();
 			AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 			if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
 				float volume = (float) (((float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) / 15) / 3.0);
@@ -241,6 +239,8 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 			bitmap.recycle();
 			DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
 			scanAreaView.drawResultBitmap(newBitmap);
+		}else{
+			barcodeScanner.start();	//启动扫描器
 		}
 
 		/* 显示条码内容并计数加1 */

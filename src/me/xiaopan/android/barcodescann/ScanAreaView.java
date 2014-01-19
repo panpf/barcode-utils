@@ -186,6 +186,7 @@ public class ScanAreaView extends View implements Runnable{
 	 * 开始刷新（移动并闪烁激光线以及显示可疑点）
 	 */
 	public void startRefresh(){
+		handler.removeCallbacks(this);
 		handler.post(this);
 	}
 	
