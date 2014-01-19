@@ -1,4 +1,4 @@
-# ![Logo](https://github.com/ixiaopan/EasyBarcode/raw/master/res/drawable-mdpi/ic_launcher.png) EasyBarcode
+# ![Logo](https://github.com/xiaopansky/EasyBarcode/raw/master/res/drawable-mdpi/ic_launcher.png) EasyBarcode
 
 这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能。目前兼容Zxing核心库版本是2.3.0，点击下载：**[zxing-core-2.3.0.jar](https://github.com/ixiaopan/EasyBarcode/raw/master/downloads/zxing-core-2.3.0.jar)**
 
@@ -82,6 +82,9 @@ protected void onDestroy() {
 }
 ```
 ###5.完整使用请参考BarcodeScanActivity.java
+
+##Depend
+>* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
 
 ##Change Log
 

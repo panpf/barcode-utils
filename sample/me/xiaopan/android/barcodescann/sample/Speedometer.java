@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xiaopan.easy.barcode.examples.activity;
+package me.xiaopan.android.barcodescann.sample;
 
 public class Speedometer {
 	private int count;

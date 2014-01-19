@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xiaopan.easy.barcode;
+package me.xiaopan.android.barcodescann;
 
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
