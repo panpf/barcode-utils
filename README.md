@@ -1,4 +1,4 @@
-# ![Logo](https://github.com/xiaopansky/EasyBarcode/raw/master/res/drawable-mdpi/ic_launcher.png) EasyBarcode
+# ![Logo](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/res/drawable-mdpi/ic_launcher.png) Android-BarcodeScanner
 
 这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能，目前兼容Zxing核心库版本是2.3.0
 
@@ -92,11 +92,11 @@ protected void onDestroy() {
 完整使用示例请参考BarcodeScanActivity.java
 
 ##Depend
->* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
+>* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
 
 ##Change Log
 
-###1.2.0 **[android-barcode-scann-1.2.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/releases/android-barcode-scann-1.2.0.jar)**
+###1.2.0 **[android-barcode-scann-1.2.0.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scann-1.2.0.jar)**
 >* 采用全新的命名规则来命名包
 >* 优化扫码结果处理逻辑，新逻辑为扫描到条码后通过onFoundBarcode()方法的返回值来确定是否要继续扫描
 >* 优化BarcodeScanner的Camera设置逻辑，改为直接调用setCamera()设置一次即可
@@ -126,7 +126,7 @@ protected void onDestroy() {
 >* Decoder.java改名为BarcodeDecoder.java；
 >* 优化了解码线程的实现方式使之更加稳定、节省内存，解码性能大幅提升；
 >* 将ResultPointCallback的回调移到了DecodeListener中，使用更方便；
->* EasyBarcode不再依赖于EasyAndroid核心库。
+>* Android-BarcodeScanner不再依赖于EasyAndroid核心库。
 
 ##License
 ```java
