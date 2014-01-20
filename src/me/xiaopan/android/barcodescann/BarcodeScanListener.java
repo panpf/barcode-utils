@@ -39,8 +39,9 @@ public interface BarcodeScanListener {
 	 * @param result
 	 * @param bitmapByteArray
 	 * @param scaleFactor
+	 * @return 是否继续扫描
 	 */
-	public void onFoundBarcode(Result result, byte[] bitmapByteArray, float scaleFactor);
+	public boolean onFoundBarcode(Result result, byte[] bitmapByteArray, float scaleFactor);
 	
 	/**
 	 * 当没有找到条码

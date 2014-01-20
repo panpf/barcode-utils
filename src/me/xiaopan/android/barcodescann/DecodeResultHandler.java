@@ -43,8 +43,11 @@ class DecodeResultHandler extends Handler {
 		if(barcodeScanListener != null){
 			switch(msg.what){
 				case MESSAGE_WHAT_DECODE_SUCCESS : 
-					barcodeScanner.stop();
-					barcodeScanListener.onFoundBarcode((Result) msg.obj, msg.getData().getByteArray(PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP), msg.getData().getFloat(PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR));
+					if(barcodeScanListener.onFoundBarcode((Result) msg.obj, msg.getData().getByteArray(PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP), msg.getData().getFloat(PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR))){
+						barcodeScanner.requestDecode();
+					}else{
+						barcodeScanner.stop();
+					}
 					break;
 				case MESSAGE_WHAT_DECODE_FAILURE : 
 					barcodeScanListener.onUnfoundBarcode();

@@ -47,11 +47,9 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 	}
 
 	@Override
-	public void onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
-//		识别到条码了，显示条码内容
-		Toast.makeText(getBaseContext(), "条码内容："+result.getText(), Toast.LENGTH_LONG).show();
-		
-//		如果你想继续扫码条码就在此调用barcodeScanner.start()方法，重新启动扫描
+	public boolean onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
+		Toast.makeText(getBaseContext(), "条码内容："+result.getText(), Toast.LENGTH_LONG).show();	//识别到条码了，显示条码内容
+		return false;	//返回false表示停止扫描，返回true表示继续扫描
 	}
 
 	@Override
@@ -61,7 +59,7 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 
 	@Override
 	public void onStopScan() {
-		//停止扫描，当扫描到条码市会在调用onFoundBarcode()之前调用此方法
+		//停止扫描，在onFoundBarcode()方法返回false或者你主动调用barcodeScanner.stop()的时候会回调此方法
 	}
 
 	@Override
@@ -100,7 +98,7 @@ protected void onDestroy() {
 
 ###1.2.0 **[android-barcode-scann-1.2.0.jar](https://github.com/xiaopansky/EasyBarcode/raw/master/releases/android-barcode-scann-1.2.0.jar)**
 >* 采用全新的命名规则来命名包
->* 优化扫码结果处理逻辑，新逻辑为扫描到条码后立即停止扫描，如果没有扫描到条码则继续扫描
+>* 优化扫码结果处理逻辑，新逻辑为扫描到条码后通过onFoundBarcode()方法的返回值来确定是否要继续扫描
 >* 优化BarcodeScanner的Camera设置逻辑，改为直接调用setCamera()设置一次即可
 
 ###1.1.2

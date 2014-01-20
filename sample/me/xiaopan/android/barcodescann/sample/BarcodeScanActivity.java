@@ -223,7 +223,7 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 	}
 
 	@Override
-	public void onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
+	public boolean onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
 		speedometer.count();
 		if(!modeToggleButton.isChecked()){//如果是单扫模式
 			AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -239,18 +239,19 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 			bitmap.recycle();
 			DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
 			scanAreaView.drawResultBitmap(newBitmap);
-		}else{
-			barcodeScanner.start();	//启动扫描器
 		}
 
 		/* 显示条码内容并计数加1 */
 		barcodeText.setText(result.getText());
 		numberText.setText("总数："+(++number)+"；速度："+speedometer.computePerSecondSpeed());
+		
+		return modeToggleButton.isChecked();
 	}
 
 	@Override
 	public void onUnfoundBarcode() {
 		AndroidLogger.e("没有找到条码");
+		numberText.setText("总数："+(number)+"；速度："+0);
 	}
 
 	@Override
