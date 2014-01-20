@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xiaopan.android.barcodescann;
+package me.xiaopan.android.barcodescanner;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;

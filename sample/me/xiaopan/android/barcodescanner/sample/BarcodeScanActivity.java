@@ -1,10 +1,10 @@
-package me.xiaopan.android.barcodescann.sample;
+package me.xiaopan.android.barcodescanner.sample;
 
-import me.xiaopan.android.barcodescann.BarcodeScanListener;
-import me.xiaopan.android.barcodescann.BarcodeScanner;
-import me.xiaopan.android.barcodescann.DecodeUtils;
-import me.xiaopan.android.barcodescann.R;
-import me.xiaopan.android.barcodescann.ScanAreaView;
+import me.xiaopan.android.barcodescanner.BarcodeScanListener;
+import me.xiaopan.android.barcodescanner.BarcodeScanner;
+import me.xiaopan.android.barcodescanner.DecodeUtils;
+import me.xiaopan.android.barcodescanner.R;
+import me.xiaopan.android.barcodescanner.ScanAreaView;
 import me.xiaopan.android.easy.util.AndroidLogger;
 import me.xiaopan.android.easy.util.RectUtils;
 import me.xiaopan.android.easy.util.ViewUtils;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xiaopan.android.barcodescann;
+package me.xiaopan.android.barcodescanner;
 
 import android.os.Bundle;
 import android.os.Handler;

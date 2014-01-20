@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="me.xiaopan.android.barcodescann"
+    package="me.xiaopan.android.barcodescanner"
     android:versionCode="120"
     android:versionName="1.2.0" >
 
@@ -14,12 +14,12 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application android:allowBackup="true" android:icon="@drawable/ic_launcher" android:label="@string/app_name">
-        <activity android:name="me.xiaopan.android.barcodescann.sample.BarcodeScanActivity" android:label="@string/app_name">
+        <activity android:name="me.xiaopan.android.barcodescanner.sample.BarcodeScanActivity" android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="me.xiaopan.android.barcodescann.sample.BarcodeGenerateActivity" android:label="分享"/>
+        <activity android:name="me.xiaopan.android.barcodescanner.sample.BarcodeGenerateActivity" android:label="分享"/>
     </application>
 </manifest>

@@ -1,4 +1,4 @@
-package me.xiaopan.android.barcodescann;
+package me.xiaopan.android.barcodescanner;
 
 /**
  * 条码格式组

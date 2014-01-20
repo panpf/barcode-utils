@@ -1,4 +1,4 @@
-package me.xiaopan.android.barcodescann;
+package me.xiaopan.android.barcodescanner;
 
 import java.io.File;
 import java.io.FileOutputStream;
