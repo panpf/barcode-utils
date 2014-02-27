@@ -12,6 +12,7 @@
 barcodeScanner = new BarcodeScanner(getBaseContext(), this);
 barcodeScanner.setDebugMode(true);
 ```
+如果你想自定义扫描格式等信息，可使用其它构造函数
 
 ###2.设置Camera和扫描区域
 在你打开Camera以后调用setCamera()方法设置Camera，例如：
@@ -91,12 +92,20 @@ protected void onDestroy() {
 
 完整使用示例请参考BarcodeScanActivity.java
 
+##Downloads
+**[android-barcode-scanner-1.2.1.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.1.jar)**
+
+**[android-barcode-scanner-1.2.1-with-src.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.1-with-src.jar)**
+
 ##Depend
 >* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
 
 ##Change Log
 
-###1.2.0 **[android-barcode-scanner-1.2.0.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.0.jar)**
+###1.2.1
+>* 更新版权信息
+
+###1.2.0
 >* 采用全新的命名规则来命名包
 >* 优化扫码结果处理逻辑，新逻辑为扫描到条码后通过onFoundBarcode()方法的返回值来确定是否要继续扫描
 >* 优化BarcodeScanner的Camera设置逻辑，改为直接调用setCamera()设置一次即可
@@ -131,7 +140,7 @@ protected void onDestroy() {
 ##License
 ```java
 /*
- * Copyright 2013 Peng fei Pan
+ * Copyright (C) 2013 Peng fei Pan <sky@xiaopan.me>
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,3 +154,4 @@ protected void onDestroy() {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ ```
