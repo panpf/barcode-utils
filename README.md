@@ -1,7 +1,6 @@
 # ![Logo](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/res/drawable-mdpi/ic_launcher.png) Android-BarcodeScanner
 
-这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能，目前兼容Zxing核心库版本是2.3.0
-
+这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能，目前兼容Zxing核心库版本是2.3.0，最低兼容Android2.2
 
 ##Usage Guide
 
