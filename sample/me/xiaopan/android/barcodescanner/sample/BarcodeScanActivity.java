@@ -5,14 +5,14 @@ import me.xiaopan.android.barcodescanner.BarcodeScanner;
 import me.xiaopan.android.barcodescanner.DecodeUtils;
 import me.xiaopan.android.barcodescanner.R;
 import me.xiaopan.android.barcodescanner.ScanAreaView;
+import me.xiaopan.android.easy.hardware.camera.AutoFocusManager;
+import me.xiaopan.android.easy.hardware.camera.BestPreviewSizeCalculator;
+import me.xiaopan.android.easy.hardware.camera.CameraManager;
+import me.xiaopan.android.easy.hardware.camera.CameraManager.CamreaBeingUsedException;
 import me.xiaopan.android.easy.util.AndroidLogger;
 import me.xiaopan.android.easy.util.RectUtils;
 import me.xiaopan.android.easy.util.ViewUtils;
 import me.xiaopan.android.easy.util.WindowUtils;
-import me.xiaopan.android.easy.util.camera.AutoFocusManager;
-import me.xiaopan.android.easy.util.camera.CameraManager;
-import me.xiaopan.android.easy.util.camera.CameraManager.CamreaBeingUsedException;
-import me.xiaopan.android.easy.util.camera.CameraOptimalSizeCalculator;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -178,9 +178,11 @@ public class BarcodeScanActivity extends Activity implements CameraManager.Camer
 	public void onInitCamera(Camera camera) {
 		/* 设置预览分辨率 */
 		Camera.Parameters parameters = camera.getParameters();
-		Size optimalPreviewSize = new CameraOptimalSizeCalculator().getPreviewSize(surfaceView.getWidth(), surfaceView.getHeight(), parameters.getSupportedPreviewSizes());
-		parameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
-		camera.setParameters(parameters);
+		Size bestPreviewSize = new BestPreviewSizeCalculator(getBaseContext(), parameters.getSupportedPreviewSizes()).getPreviewSize();
+		if(bestPreviewSize != null){
+			parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
+			camera.setParameters(parameters);
+		}
 		
         //设置相机和扫描区域
         barcodeScanner.setCamera(camera);
