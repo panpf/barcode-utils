@@ -16,20 +16,15 @@
 
 package me.xiaopan.android.barcodescanner;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Vector;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.Camera;
+import com.google.zxing.*;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.ResultPoint;
-import com.google.zxing.ResultPointCallback;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * 条码扫描器，默认的扫描区域为全屏如果你想指定扫描区域的话，就使用setScanAreaRectInPreview(Rect)方法设置
@@ -47,7 +42,7 @@ public class BarcodeScanner{
 	private Camera.Size cameraPreviewSize;	//相机预览尺寸
 	private DecodeThread decodeThread;	//解码线程
 	private MultiFormatReader multiFormatReader;	//解码器
-	private BarcodeScanListener barcodeScanListener;	//解码监听器
+	private DecodeListener decodeListener;	//解码监听器
 	private DecodeResultHandler decodeResultHandler;	//解码结果处理器
 	private DecodePreviewCallback decodePreviewCallback;	//解码预览回调
 	
@@ -55,12 +50,12 @@ public class BarcodeScanner{
 	 * 创建一个条码扫描器
 	 * @param context 上下文
 	 * @param hints Zxing解码器所需的一些信息，你可以在此指定解码格式、编码方式等信息，如果此参数为null，那么将解码所有支持的格式、并且编码方式默认为UFT-8
-	 * @param barcodeScanListener 解码监听器
+	 * @param decodeListener 解码监听器
 	 */
-	public BarcodeScanner(Context context, Map<DecodeHintType, Object> hints, BarcodeScanListener barcodeScanListener){
+	public BarcodeScanner(Context context, Map<DecodeHintType, Object> hints, DecodeListener decodeListener){
 		MultiFormatReader multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(createHints(hints));
-		init(context, multiFormatReader, barcodeScanListener);
+		init(context, multiFormatReader, decodeListener);
 	}
 	
 	/**
@@ -68,24 +63,24 @@ public class BarcodeScanner{
 	 * @param context 上下文
 	 * @param barcodeFormats 支持的格式
 	 * @param charset 编码方式
-	 * @param barcodeScanListener 解码监听器
+	 * @param decodeListener 解码监听器
 	 */
-	public BarcodeScanner(Context context, BarcodeFormat[] barcodeFormats, String charset, BarcodeScanListener barcodeScanListener){
+	public BarcodeScanner(Context context, BarcodeFormat[] barcodeFormats, String charset, DecodeListener decodeListener){
 		MultiFormatReader multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(createHints(barcodeFormats, charset));
-		init(context, multiFormatReader, barcodeScanListener);
+		init(context, multiFormatReader, decodeListener);
 	}
 	
 	/**
 	 * 创建一个条码扫描器，默认编码方式为UTF-8
 	 * @param context 上下文
 	 * @param barcodeFormats 支持的格式
-	 * @param barcodeScanListener 解码监听器
+	 * @param decodeListener 解码监听器
 	 */
-	public BarcodeScanner(Context context, BarcodeFormat[] barcodeFormats, BarcodeScanListener barcodeScanListener){
+	public BarcodeScanner(Context context, BarcodeFormat[] barcodeFormats, DecodeListener decodeListener){
 		MultiFormatReader multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(createHints(barcodeFormats, null));
-		init(context, multiFormatReader, barcodeScanListener);
+		init(context, multiFormatReader, decodeListener);
 	}
 	
 	/**
@@ -93,49 +88,49 @@ public class BarcodeScanner{
 	 * @param context 上下文
 	 * @param barcodeFormatGroups 支持的格式组
 	 * @param charset 编码方式
-	 * @param barcodeScanListener 解码监听器
+	 * @param decodeListener 解码监听器
 	 */
-	public BarcodeScanner(Context context, BarcodeFormatGroup[] barcodeFormatGroups, String charset, BarcodeScanListener barcodeScanListener){
+	public BarcodeScanner(Context context, BarcodeFormatGroup[] barcodeFormatGroups, String charset, DecodeListener decodeListener){
 		MultiFormatReader multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(createHints(barcodeFormatGroups, charset));
-		init(context, multiFormatReader, barcodeScanListener);
+		init(context, multiFormatReader, decodeListener);
 	}
 	
 	/**
 	 * 创建一个条码扫描器，默认编码方式为UTF-8
 	 * @param context 上下文
 	 * @param barcodeFormatGroups 支持的格式组
-	 * @param barcodeScanListener 解码监听器
+	 * @param decodeListener 解码监听器
 	 */
-	public BarcodeScanner(Context context, BarcodeFormatGroup[] barcodeFormatGroups, BarcodeScanListener barcodeScanListener){
-        this(context, barcodeFormatGroups, null, barcodeScanListener);
+	public BarcodeScanner(Context context, BarcodeFormatGroup[] barcodeFormatGroups, DecodeListener decodeListener){
+        this(context, barcodeFormatGroups, null, decodeListener);
 	}
 	
 	/**
 	 * 创建一个条码扫描器，默认支持全部格式，编码方式为UTF-8
 	 * @param context 上下文
-	 * @param barcodeScanListener 解码监听器
+	 * @param decodeListener 解码监听器
 	 */
-	public BarcodeScanner(Context context, BarcodeScanListener barcodeScanListener){
+	public BarcodeScanner(Context context, DecodeListener decodeListener){
 		MultiFormatReader multiFormatReader = new MultiFormatReader();
 		multiFormatReader.setHints(createHints(null));
-		init(context, multiFormatReader, barcodeScanListener);
+		init(context, multiFormatReader, decodeListener);
 	}
 	
 	/**
 	 * 初始化
 	 * @param context 上下文
 	 * @param multiFormatReader 解码器
-	 * @param barcodeScanListener 扫描监听器
+	 * @param decodeListener 扫描监听器
 	 */
-	private void init(Context context, MultiFormatReader multiFormatReader, BarcodeScanListener barcodeScanListener){
+	private void init(Context context, MultiFormatReader multiFormatReader, DecodeListener decodeListener){
 		this.context = context;
 		this.multiFormatReader = multiFormatReader;
-		this.barcodeScanListener = barcodeScanListener;
-		decodeResultHandler = new DecodeResultHandler(this, barcodeScanListener);
-		decodePreviewCallback = new DecodePreviewCallback();
-		decodeThread = new DecodeThread(this );
-		decodeThread.start();
+		this.decodeListener = decodeListener;
+        this.decodeResultHandler = new DecodeResultHandler(this, decodeListener);
+        this.decodePreviewCallback = new DecodePreviewCallback();
+        this.decodeThread = new DecodeThread(this );
+        this.decodeThread.start();
 	}
 	
 	/**
@@ -166,9 +161,6 @@ public class BarcodeScanner{
 			if(!scanning){
 				scanning = true;
 				requestDecode();
-				if(barcodeScanListener != null){
-					barcodeScanListener.onStartScan();
-				}
 			}
 		}else{
 			throw new IllegalStateException("BarcodeScanner has been released.");
@@ -181,9 +173,6 @@ public class BarcodeScanner{
 	public void stop(){
 		if(!released && scanning){
             scanning = false;
-            if(barcodeScanListener != null){
-                barcodeScanListener.onStopScan();
-            }
 		}
 	}
 	
@@ -197,9 +186,6 @@ public class BarcodeScanner{
 				scanning = false;
 				camera = null;
 				decodeThread.getDecodeHandler().sendQuitMessage();
-			}
-			if(barcodeScanListener != null){
-				barcodeScanListener.onRelease();
 			}
 		}
 	}
@@ -374,8 +360,8 @@ public class BarcodeScanner{
 			hints.put(DecodeHintType.NEED_RESULT_POINT_CALLBACK, new ResultPointCallback() {
 				@Override
 				public void foundPossibleResultPoint(ResultPoint resultPoint) {
-					if(barcodeScanListener != null){
-						barcodeScanListener.onFoundPossibleResultPoint(resultPoint);
+					if(decodeListener != null){
+						decodeListener.onFoundPossibleResultPoint(resultPoint);
 					}
 				}
 			});

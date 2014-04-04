@@ -19,8 +19,6 @@ package me.xiaopan.android.barcodescanner.sample;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.ShutterCallback;
 import android.os.Build;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -32,17 +30,18 @@ import java.io.IOException;
 /**
  * 相机管理器
  */
-public class CameraManager implements Camera.AutoFocusCallback{
+public class CameraManager{
 	private static final String LOG_TAG = CameraManager.class.getSimpleName();
     private int frontCameraId = -1;	//前置摄像头的ID
     private int backCameraId = -1;	//后置摄像头的ID
 	private int displayOrientation;	//显示方向
 	private boolean debugMode;	//Debug模式，开启后将输出运行日志
+    private boolean isBackCamera;
 	private Camera camera;	//Camera
-	private Activity activity;	
+	private Activity activity;
 	private SurfaceHolder surfaceHolder;
 	private CameraCallback cameraCallback;
-    private boolean isBackCamera;
+    private LoopFocusManager autoFocusManager;
 
 	@SuppressWarnings("deprecation")
 	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
@@ -182,47 +181,6 @@ public class CameraManager implements Camera.AutoFocusCallback{
 		}
 	}
 
-    @Override
-    public void onAutoFocus(boolean success, Camera camera) {
-        if(debugMode){
-            Log.d(LOG_TAG, "自定对焦"+(success?"成功":"失败"));
-        }
-        if(cameraCallback != null){
-            cameraCallback.onAutoFocus(success, camera);
-        }
-    }
-	
-	/**
-	 * 自动对焦
-	 */
-	public void autoFocus(){
-		if(camera != null){
-			if(debugMode){
-				Log.d(LOG_TAG, "autoFocus");
-			}
-			try{
-				camera.autoFocus(this);
-			}catch(Throwable throwable){
-				throwable.printStackTrace();
-			}
-		}
-	}
-	
-	/**
-	 * 拍照
-	 * @param shutter 快门回调
-	 * @param raw RAW格式图片回调
-	 * @param jpeg JPEG格式图片回调
-	 */
-	public void takePicture(ShutterCallback shutter, PictureCallback raw, PictureCallback jpeg){
-		if(camera != null){
-			if(debugMode){
-				Log.d(LOG_TAG, "takePicture");
-			}
-			camera.takePicture(shutter, raw, jpeg);
-		}
-	}
-	
 	/**
 	 * 设置闪光模式
 	 * @param newFlashMode
@@ -358,14 +316,13 @@ public class CameraManager implements Camera.AutoFocusCallback{
 	public interface CameraCallback{
 		public void onInitCamera(Camera camera);
 		public void onStartPreview();
-		public void onAutoFocus(boolean success, Camera camera);
 		public void onStopPreview();
 	}
 	
 	/**
 	 * 相机被占用异常
 	 */
-	public class CameraBeingUsedException extends Throwable{
+	public class CameraBeingUsedException extends Exception{
 		private static final long serialVersionUID = -410101242781061339L;
 	}
 }

@@ -22,12 +22,7 @@ import com.google.zxing.ResultPoint;
 /**
  * 条码扫描监听器
  */
-public interface BarcodeScanListener {
-	/**
-	 * 当启动扫描
-	 */
-	public void onStartScan();
-	
+public interface DecodeListener {
 	/**
 	 * 当找到可能的结果点
 	 * @param resultPoint
@@ -41,20 +36,5 @@ public interface BarcodeScanListener {
 	 * @param scaleFactor
 	 * @return 是否继续扫描
 	 */
-	public boolean onFoundBarcode(Result result, byte[] bitmapByteArray, float scaleFactor);
-	
-	/**
-	 * 当没有找到条码
-	 */
-	public void onUnfoundBarcode();
-	
-	/**
-	 * 当停止扫描，当扫描到条码时会在调用onFoundBarcode()之前调用此方法
-	 */
-	public void onStopScan();
-	
-	/**
-	 * 当释放
-	 */
-	public void onRelease();
+	public boolean onDecodeCallback(Result result, byte[] bitmapByteArray, float scaleFactor);
 }
