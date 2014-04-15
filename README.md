@@ -33,12 +33,7 @@ barcodeScanner.start();
 
 ###3.处理回调事件
 ```java
-private class MyBarcodeScanListener implements BarcodeScanListener{
-	@Override
-	public void onStartScan() {
-		//启动扫描
-	}
-
+private class MyBarcodeScanCallback implements BarcodeScanCallback{
 	@Override
 	public void onFoundPossibleResultPoint(ResultPoint resultPoint) {
 //		你可以在这里将可疑点绘制到你的界面上
@@ -47,24 +42,14 @@ private class MyBarcodeScanListener implements BarcodeScanListener{
 	}
 
 	@Override
-	public boolean onFoundBarcode(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
-		Toast.makeText(getBaseContext(), "条码内容："+result.getText(), Toast.LENGTH_LONG).show();	//识别到条码了，显示条码内容
-		return false;	//返回false表示停止扫描，返回true表示继续扫描
-	}
-
-	@Override
-	public void onUnfoundBarcode() {
-		//没有识别到条码，注意：此方法会持续回调
-	}
-
-	@Override
-	public void onStopScan() {
-		//停止扫描，在onFoundBarcode()方法返回false或者你主动调用barcodeScanner.stop()的时候会回调此方法
-	}
-
-	@Override
-	public void onRelease() {
-		//释放
+	public boolean onDecodeCallback(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
+		if(result != null){
+			// 找到条码
+			return false;	//停止扫描
+		}else{
+			// 没有找到他条码
+			return true;	//继续扫描
+		}
 	}
 }
 ```
@@ -92,14 +77,17 @@ protected void onDestroy() {
 完整使用示例请参考BarcodeScanActivity.java
 
 ##Downloads
-**[android-barcode-scanner-1.2.1.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.1.jar)**
+**[android-barcode-scanner-1.2.2.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.2.jar)**
 
-**[android-barcode-scanner-1.2.1-with-src.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.1-with-src.jar)**
+**[android-barcode-scanner-1.2.2-with-src.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.2-with-src.jar)**
 
 ##Depend
 >* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
 
 ##Change Log
+
+###1.2.2
+>* 优化扫描回调逻辑
 
 ###1.2.1
 >* 更新版权信息

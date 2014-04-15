@@ -1,5 +1,20 @@
 package me.xiaopan.android.barcodescanner.sample;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import me.xiaopan.android.barcodescanner.BarcodeScanner;
+import me.xiaopan.android.barcodescanner.BarcodeScanner.BarcodeScanCallback;
+import me.xiaopan.android.barcodescanner.DecodeUtils;
+import me.xiaopan.android.barcodescanner.R;
+import me.xiaopan.android.barcodescanner.ScanAreaView;
+import me.xiaopan.android.easy.hardware.camera.BestPreviewSizeCalculator;
+import me.xiaopan.android.easy.hardware.camera.CameraManager;
+import me.xiaopan.android.easy.util.DeviceUtils;
+import me.xiaopan.android.easy.util.RectUtils;
+import me.xiaopan.android.easy.util.ViewUtils;
+import me.xiaopan.android.easy.util.WindowUtils;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -32,17 +47,10 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
-import me.xiaopan.android.barcodescanner.*;
-import me.xiaopan.android.easy.hardware.camera.BestPreviewSizeCalculator;
-import me.xiaopan.android.easy.util.RectUtils;
-import me.xiaopan.android.easy.util.ViewUtils;
-import me.xiaopan.android.easy.util.WindowUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 条码扫描Activity
@@ -64,7 +72,6 @@ public class BarcodeScanActivity extends Activity{
 	private ScanAreaView scanAreaView;
 	private BarcodeScanner barcodeScanner;
 	private CameraManager cameraManager;
-	private LoopFocusManager loopFocusManager;
 	private Speedometer speedometer;
     private View upDoor;
     private View downDoor;
@@ -177,8 +184,6 @@ public class BarcodeScanActivity extends Activity{
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 
-        loopFocusManager = new LoopFocusManager();
-        loopFocusManager.setDebugMode(true);
 		speedometer = new Speedometer();
 
         barcodeScanner = new BarcodeScanner(getBaseContext(), new BarcodeFormat[]{BarcodeFormat.QR_CODE}, new BarcodeScanListener());
@@ -192,7 +197,7 @@ public class BarcodeScanActivity extends Activity{
 
         // 延迟100毫秒启动相机
         Log.d(BarcodeScanActivity.class.getSimpleName(), "延迟100毫秒启动相机");
-        handler.postDelayed(openCameraRunnable, 100);
+        handler.postDelayed(openCameraRunnable, 50);
 	}	
 	
 	@Override
@@ -286,12 +291,16 @@ public class BarcodeScanActivity extends Activity{
 	}
 
     private class MyCameraCallback implements CameraManager.CameraCallback {
-        @Override
+        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+		@Override
         public void onInitCamera(Camera camera) {
             Camera.Parameters parameters = camera.getParameters();
 
             // 设置预览分辨率
-            Size previewSize = new BestPreviewSizeCalculator(getBaseContext(), parameters.getSupportedPreviewSizes()).getPreviewSize();
+            BestPreviewSizeCalculator bestPreviewSizeCalculator = new BestPreviewSizeCalculator(getBaseContext(), parameters.getSupportedPreviewSizes());
+            Point screenSize = DeviceUtils.getScreenSize(getBaseContext());
+            bestPreviewSizeCalculator.setMinPreviewSizePixels((int) ((screenSize.x * screenSize.y) * 0.8f));
+            Size previewSize = bestPreviewSizeCalculator.getPreviewSize();
             if(previewSize != null){
                 parameters.setPreviewSize(previewSize.width, previewSize.height);
             }else{
@@ -312,7 +321,6 @@ public class BarcodeScanActivity extends Activity{
 
             // 给条码扫描器个循环对焦器绑定相机
             barcodeScanner.setCamera(camera);
-            loopFocusManager.setCamera(camera);
 
             // 设置扫描区域
             barcodeScanner.setScanAreaRectInPreview(scan);
@@ -333,12 +341,12 @@ public class BarcodeScanActivity extends Activity{
             if(barcodeScanner != null){
                 barcodeScanner.stop();
                 scanAreaView.stopRefresh();
-                loopFocusManager.stop();
+                cameraManager.getLoopFocusManager().stop();
             }
         }
     }
 
-    private class BarcodeScanListener implements DecodeListener {
+    private class BarcodeScanListener implements BarcodeScanCallback {
         private boolean first = true;
 
         @Override
@@ -352,7 +360,7 @@ public class BarcodeScanActivity extends Activity{
         public boolean onDecodeCallback(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
             if(result != null){
                 // 停止循环对焦
-                loopFocusManager.stop();
+            	cameraManager.getLoopFocusManager().stop();
 
                 // 显示扫码总数和速度
                 speedometer.count();
@@ -384,7 +392,7 @@ public class BarcodeScanActivity extends Activity{
 
                 return isContinueScan;
             }else{
-                loopFocusManager.start(!first);  //延迟启动循环对焦
+            	cameraManager.getLoopFocusManager().start(!first);  //延迟启动循环对焦
                 first = false;
                 numberText.setText("总数：" + (number) + "；速度：" + 0);  //清空速度
                 return true;    //继续扫描

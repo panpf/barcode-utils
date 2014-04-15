@@ -49,7 +49,7 @@ public class ScanAreaView extends View implements Runnable{
 	private int laserLineRight;	//激光线的右边距
 	private int laserLineAlphaIndex;	//激光线透明度索引
 	private int resultPointColor = -256;	//可疑点的颜色，默认为黄色
-	private int refreshSpec = 30;	//两次刷新之间的间隔，单位毫秒
+	private int refreshSpec = 10;	//两次刷新之间的间隔，单位毫秒
 	private int[] laserLineAlphas = {40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 255, 240, 220, 200, 180, 160, 140, 120, 100, 80, 60};//激光线透明度变化表
 	private float newResultPointRadius = 6.0f;	//新的可疑点半径
 	private float oldResultPointRadius = 3.0f;	//旧的可疑点半径

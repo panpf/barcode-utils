@@ -16,6 +16,7 @@
 
 package me.xiaopan.android.barcodescanner;
 
+import me.xiaopan.android.barcodescanner.BarcodeScanner.BarcodeScanCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,26 +32,26 @@ class DecodeResultHandler extends Handler {
 	public static final String PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP = "PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP";
 	public static final String PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR = "PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR";
 	private BarcodeScanner barcodeScanner;
-	private DecodeListener decodeListener;
+	private BarcodeScanCallback barcodeScanCallback;
 	
-	public DecodeResultHandler(BarcodeScanner barcodeScanner, DecodeListener decodeListener) {
+	public DecodeResultHandler(BarcodeScanner barcodeScanner, BarcodeScanCallback barcodeScanCallback) {
 		this.barcodeScanner = barcodeScanner;
-		this.decodeListener = decodeListener;
+		this.barcodeScanCallback = barcodeScanCallback;
 	}
 	
 	@Override
 	public void handleMessage(Message msg) {
-		if(decodeListener != null && barcodeScanner.isScanning()){
+		if(barcodeScanCallback != null && barcodeScanner.isScanning()){
 			switch(msg.what){
 				case MESSAGE_WHAT_DECODE_SUCCESS : 
-					if(decodeListener.onDecodeCallback((Result) msg.obj, msg.getData().getByteArray(PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP), msg.getData().getFloat(PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR))){
+					if(barcodeScanCallback.onDecodeCallback((Result) msg.obj, msg.getData().getByteArray(PARAM_OPTIONAL_BYTE_ARRAY_BARCODE_BITMAP), msg.getData().getFloat(PARAM_OPTIONAL_FLOAT_BARCODE_SCALED_FACTOR))){
 						barcodeScanner.requestDecode();
 					}else{
 						barcodeScanner.stop();
 					}
 					break;
 				case MESSAGE_WHAT_DECODE_FAILURE :
-                    if(decodeListener.onDecodeCallback(null, null, 0)){
+                    if(barcodeScanCallback.onDecodeCallback(null, null, 0)){
                         barcodeScanner.requestDecode();
                     }else{
                         barcodeScanner.stop();
