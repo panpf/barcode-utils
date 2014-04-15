@@ -87,7 +87,7 @@ public class BarcodeScanActivity extends Activity{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
-		setContentView(R.layout.activity_decode);
+		setContentView(R.layout.activity_scan);
 		surfaceView = (SurfaceView) findViewById(R.id.surface_decode);
 		scanAreaView = (ScanAreaView) findViewById(R.id.scannArea_decode);
 		flashButton = (ToggleButton) findViewById(R.id.toggleButton_decode_flash);
@@ -183,37 +183,24 @@ public class BarcodeScanActivity extends Activity{
 		/* 初始化 */
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), new MyCameraCallback());
 		cameraManager.setDebugMode(true);
-
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
-
 		speedometer = new Speedometer();
-
-        barcodeScanner = new BarcodeScanner(getBaseContext(), new BarcodeFormat[]{BarcodeFormat.QR_CODE}, new BarcodeScanListener());
+        barcodeScanner = new BarcodeScanner(getBaseContext(), new BarcodeFormat[]{BarcodeFormat.QR_CODE}, new MyBarcodeScanCallback());
         barcodeScanner.setDebugMode(true);
-        Log.d(BarcodeScanActivity.class.getSimpleName(), "onCreate()");
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-        // 延迟100毫秒启动相机
-        Log.d(BarcodeScanActivity.class.getSimpleName(), "延迟100毫秒启动相机");
-        handler.postDelayed(openCameraRunnable, 50);
+        handler.postDelayed(openCameraRunnable, 100);
 	}	
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-        // 取消启动相机的Runnable
-        Log.d(BarcodeScanActivity.class.getSimpleName(), "取消启动相机");
         handler.removeCallbacks(openCameraRunnable);
-
         cameraManager.release();
-
-        // 延迟500毫秒显示门
-        Log.d(BarcodeScanActivity.class.getSimpleName(), "延迟500毫秒显示门");
         handler.postDelayed(pauseRunnable, 500);
 	}
 
@@ -233,6 +220,7 @@ public class BarcodeScanActivity extends Activity{
         }
         if(barcodeScanner != null){
             barcodeScanner.release();
+			barcodeScanner = null;
         }
         super.onDestroy();
     }
@@ -242,16 +230,17 @@ public class BarcodeScanActivity extends Activity{
         // 执行关门动画，在动画执行完毕后退出Activity
         upDoor.setVisibility(View.VISIBLE);
         downDoor.setVisibility(View.VISIBLE);
-        executeAnimation(upDoor, R.anim.base_slide_to_bottom_in, null);
-        executeAnimation(downDoor, R.anim.base_slide_to_top_in, new Animation.AnimationListener() {
-            public void onAnimationStart(Animation animation) {
-            }
-
-            public void onAnimationRepeat(Animation animation) {
-            }
-
+        executeAnimation(upDoor, R.anim.slide_to_bottom_in, null);
+        executeAnimation(downDoor, R.anim.slide_to_top_in, new Animation.AnimationListener() {
+            public void onAnimationStart(Animation animation) {}
+            public void onAnimationRepeat(Animation animation) {}
             public void onAnimationEnd(Animation animation) {
-                BarcodeScanActivity.super.onBackPressed();
+            	handler.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						BarcodeScanActivity.super.onBackPressed();
+					}
+				}, 100);
             }
         });
     }
@@ -322,41 +311,32 @@ public class BarcodeScanActivity extends Activity{
             }
             camera.setParameters(parameters);
 
-            // 给条码扫描器个循环对焦器绑定相机
-            barcodeScanner.setCamera(camera);
-
-            // 设置扫描区域
-            barcodeScanner.setScanAreaRectInPreview(scan);
+            barcodeScanner.setCamera(camera); //设置相机
+            barcodeScanner.setScanAreaRectInPreview(scan);// 设置扫描区域
         }
 
         @Override
         public void onStartPreview() {
-            if(barcodeScanner != null){
-                barcodeScanner.start();
-                scanAreaView.startRefresh();
-            }
-            executeAnimation(upDoor, R.anim.base_slide_to_top_out, View.GONE);
-            executeAnimation(downDoor, R.anim.base_slide_to_bottom_out, View.GONE);
+            barcodeScanner.start();
+            scanAreaView.startRefresh();
+            executeAnimation(upDoor, R.anim.slide_to_top_out, View.GONE);
+            executeAnimation(downDoor, R.anim.slide_to_bottom_out, View.GONE);
         }
 
         @Override
         public void onStopPreview() {
-            if(barcodeScanner != null){
-                barcodeScanner.stop();
-                scanAreaView.stopRefresh();
-                cameraManager.getLoopFocusManager().stop();
-            }
+            barcodeScanner.stop();
+            scanAreaView.stopRefresh();
+            cameraManager.getLoopFocusManager().stop();
         }
     }
 
-    private class BarcodeScanListener implements BarcodeScanCallback {
+    private class MyBarcodeScanCallback implements BarcodeScanCallback {
         private boolean first = true;
 
         @Override
         public void onFoundPossibleResultPoint(ResultPoint resultPoint) {
-            if(scanAreaView != null){
-                scanAreaView.addResultPoint(resultPoint);
-            }
+            scanAreaView.addResultPoint(resultPoint);
         }
 
         @Override
