@@ -106,6 +106,9 @@ public class BarcodeScanActivity extends Activity{
                 if(cameraManager != null){
                     try {
                         cameraManager.openBackCamera();
+                        if(!cameraManager.setTorchFlash(flashButton.isChecked())){
+                        	Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮", Toast.LENGTH_SHORT).show();
+            			}
                     } catch (Exception e) {
                         e.printStackTrace();
                         Toast.makeText(getBaseContext(), "无法打开您的摄像头，请确保摄像头没有被其它程序占用", Toast.LENGTH_SHORT).show();
