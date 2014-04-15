@@ -56,7 +56,6 @@ import com.google.zxing.ResultPoint;
  * 条码扫描Activity
  */
 public class BarcodeScanActivity extends Activity{
-//	public static final String RETURN_BARCODE_CONTENT = "RETURN_BARCODE_CONTENT";
 	private static final String STATE_FLASH_CHECKED = "STATE_FLASH_CHECKED";
 	private static final int REQUEST_CODE_GET_IMAGE = 46231;
 	private int beepId;
@@ -134,6 +133,7 @@ public class BarcodeScanActivity extends Activity{
 				if(barcodeScanner != null){
 					barcodeScanner.start();
                     scanAreaView.startRefresh();
+                    scanAreaView.drawResultBitmap(null);
 				}
 			}
 		});
@@ -240,7 +240,7 @@ public class BarcodeScanActivity extends Activity{
 					public void run() {
 						BarcodeScanActivity.super.onBackPressed();
 					}
-				}, 100);
+				}, 10);
             }
         });
     }
