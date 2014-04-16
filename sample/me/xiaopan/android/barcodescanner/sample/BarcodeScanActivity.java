@@ -97,34 +97,6 @@ public class BarcodeScanActivity extends Activity{
 		imageDecodeButton = findViewById(R.id.button_decode_imageDecode);
         upDoor = findViewById(R.id.layout_main_doorUp);
         downDoor = findViewById(R.id.layout_main_doorDown);
-
-        handler = new Handler();
-        openCameraRunnable = new Runnable(){
-            @Override
-            public void run() {
-                if(cameraManager != null){
-                    try {
-                        cameraManager.openBackCamera();
-                        if(!cameraManager.setTorchFlash(flashButton.isChecked())){
-                        	Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮", Toast.LENGTH_SHORT).show();
-            			}
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(getBaseContext(), "无法打开您的摄像头，请确保摄像头没有被其它程序占用", Toast.LENGTH_SHORT).show();
-                        BarcodeScanActivity.super.onBackPressed();
-                    }
-                }
-            }
-        };
-
-        pauseRunnable = new Runnable(){
-            @Override
-            public void run() {
-                Log.d(BarcodeScanActivity.class.getSimpleName(), "显示门");
-                upDoor.setVisibility(View.VISIBLE);
-                downDoor.setVisibility(View.VISIBLE);
-            }
-        };
 		
 		//点击扫描区域开始解码
 		scanAreaView.setOnClickListener(new OnClickListener() {
@@ -144,6 +116,7 @@ public class BarcodeScanActivity extends Activity{
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if(!cameraManager.setTorchFlash(isChecked)){
 					Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮功能", Toast.LENGTH_SHORT).show();
+                	flashButton.setChecked(!flashButton.isChecked());
 				}
 			}
 		});
@@ -181,13 +154,16 @@ public class BarcodeScanActivity extends Activity{
 		}
 		
 		/* 初始化 */
+        handler = new Handler();
+        openCameraRunnable = new OpenCameraRunnable();
+        pauseRunnable = new PauseRunnable();
 		cameraManager = new CameraManager(this, surfaceView.getHolder(), new MyCameraCallback());
 		cameraManager.setDebugMode(true);
+		barcodeScanner = new BarcodeScanner(getBaseContext(), new BarcodeFormat[]{BarcodeFormat.QR_CODE}, new MyBarcodeScanCallback());
+		barcodeScanner.setDebugMode(true);
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		beepId = soundPool.load(getBaseContext(), R.raw.beep, 100);
 		speedometer = new Speedometer();
-        barcodeScanner = new BarcodeScanner(getBaseContext(), new BarcodeFormat[]{BarcodeFormat.QR_CODE}, new MyBarcodeScanCallback());
-        barcodeScanner.setDebugMode(true);
 	}
 	
 	@Override
@@ -212,16 +188,9 @@ public class BarcodeScanActivity extends Activity{
 
     @Override
     protected void onDestroy() {
-        cameraManager = null;
         handler.removeCallbacks(pauseRunnable);
-        if(soundPool != null){
-            soundPool.release();
-            soundPool = null;
-        }
-        if(barcodeScanner != null){
-            barcodeScanner.release();
-			barcodeScanner = null;
-        }
+        soundPool.release();
+        barcodeScanner.release();
         super.onDestroy();
     }
 
@@ -300,19 +269,19 @@ public class BarcodeScanActivity extends Activity{
             }
 
             // 计算扫描框在预览图中的区域
-            Rect scan = RectUtils.mappingRect(ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(surfaceView.getWidth(), surfaceView.getHeight()), new Point(previewSize.width, previewSize.height), WindowUtils.isPortrait(getBaseContext()));
+            Rect scanRectInPreview = RectUtils.mappingRect(ViewUtils.getRelativeRect(scanAreaView, surfaceView), new Point(surfaceView.getWidth(), surfaceView.getHeight()), new Point(previewSize.width, previewSize.height), WindowUtils.isPortrait(getBaseContext()));
 
             // 设置对焦区域
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH){
                 List<Camera.Area> areas = new ArrayList<Camera.Area>(1);
-                areas.add(new Camera.Area(scan, 1000));
+                areas.add(new Camera.Area(scanRectInPreview, 1000));
                 parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
                 parameters.setFocusAreas(areas);
             }
             camera.setParameters(parameters);
 
             barcodeScanner.setCamera(camera); //设置相机
-            barcodeScanner.setScanAreaRectInPreview(scan);// 设置扫描区域
+            barcodeScanner.setScanAreaRectInPreview(scanRectInPreview);// 设置扫描区域
         }
 
         @Override
@@ -342,8 +311,7 @@ public class BarcodeScanActivity extends Activity{
         @Override
         public boolean onDecodeCallback(final Result result, final byte[] barcodeBitmapByteArray, final float scaleFactor) {
             if(result != null){
-                // 停止循环对焦
-            	cameraManager.getLoopFocusManager().stop();
+            	cameraManager.getLoopFocusManager().stop(); // 停止循环对焦
 
                 // 显示扫码总数和速度
                 speedometer.count();
@@ -354,6 +322,8 @@ public class BarcodeScanActivity extends Activity{
 
                 // 如果停止扫描
                 if(!isContinueScan){
+                    scanAreaView.stopRefresh();//扫描动画视图停止刷新
+                    
                     // 发出声音和震动提示
                     AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
                     if(audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL){
@@ -368,9 +338,6 @@ public class BarcodeScanActivity extends Activity{
                     bitmap.recycle();
                     DecodeUtils.drawResultPoints(newBitmap, scaleFactor, result, 0xc099cc00);
                     scanAreaView.drawResultBitmap(newBitmap);
-
-                    //扫描动画视图停止刷新
-                    scanAreaView.stopRefresh();
                 }
 
                 return isContinueScan;
@@ -403,5 +370,33 @@ public class BarcodeScanActivity extends Activity{
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         animation.setAnimationListener(animationListener);
         view.startAnimation(animation);
+    }
+    
+    private class OpenCameraRunnable  implements Runnable{
+    	@Override
+        public void run() {
+            if(cameraManager != null){
+                try {
+                    cameraManager.openBackCamera();
+                    if(!cameraManager.setTorchFlash(flashButton.isChecked())){
+                    	Toast.makeText(getBaseContext(), "您的设备不支持闪光灯常亮", Toast.LENGTH_SHORT).show();
+                    	flashButton.setChecked(!flashButton.isChecked());
+        			}
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getBaseContext(), "无法打开您的摄像头，请确保摄像头没有被其它程序占用", Toast.LENGTH_SHORT).show();
+                    BarcodeScanActivity.super.onBackPressed();
+                }
+            }
+        }
+    }
+    
+    private class PauseRunnable  implements Runnable{
+        @Override
+        public void run() {
+            Log.d(BarcodeScanActivity.class.getSimpleName(), "显示门");
+            upDoor.setVisibility(View.VISIBLE);
+            downDoor.setVisibility(View.VISIBLE);
+        }
     }
 }
