@@ -105,7 +105,7 @@ protected void onDestroy() {
 
 >* **[android-happy-barcode-1.3.0-with-src.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/releases/android-happy-barcode-1.3.0-with-src.jar)**
 
-Depend
+Dependencies
 >* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
 
 ##Change Log
