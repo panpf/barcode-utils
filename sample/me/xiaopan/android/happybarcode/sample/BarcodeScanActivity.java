@@ -1,13 +1,13 @@
-package me.xiaopan.android.barcodescanner.sample;
+package me.xiaopan.android.happybarcode.sample;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import me.xiaopan.android.barcodescanner.BarcodeScanner;
-import me.xiaopan.android.barcodescanner.BarcodeScanner.BarcodeScanCallback;
-import me.xiaopan.android.barcodescanner.DecodeUtils;
-import me.xiaopan.android.barcodescanner.R;
-import me.xiaopan.android.barcodescanner.ScanAreaView;
+import me.xiaopan.android.happybarcode.BarcodeScanner;
+import me.xiaopan.android.happybarcode.DecodeUtils;
+import me.xiaopan.android.happybarcode.R;
+import me.xiaopan.android.happybarcode.BarcodeScanner.BarcodeScanCallback;
+import me.xiaopan.android.happybarcode.widget.ScanAreaView;
 import me.xiaopan.android.easy.hardware.camera.BestPreviewSizeCalculator;
 import me.xiaopan.android.easy.hardware.camera.CameraManager;
 import me.xiaopan.android.easy.util.DeviceUtils;

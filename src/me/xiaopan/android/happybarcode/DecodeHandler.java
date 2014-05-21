@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xiaopan.android.barcodescanner;
+package me.xiaopan.android.happybarcode;
 
 import java.io.ByteArrayOutputStream;
 
@@ -34,14 +34,14 @@ import com.google.zxing.common.HybridBinarizer;
 /**
  * 解码处理器
  */
-class DecodeHandler extends Handler {
+public class DecodeHandler extends Handler {
 	public static final int MESSAGE_WHAT_DECODE = 231242; 
 	public static final int MESSAGE_WHAT_QUIT = 231243;
 	private BarcodeScanner barcodeScanner;
 	private SecondChronograph secondChronograph;
 	private Rect scanAreaInPreviewRect;
 
-	public DecodeHandler(BarcodeScanner barcodeScanner) {
+	DecodeHandler(BarcodeScanner barcodeScanner) {
 		this.barcodeScanner = barcodeScanner;
 		secondChronograph = new SecondChronograph();
 		scanAreaInPreviewRect = new Rect();
@@ -82,7 +82,7 @@ class DecodeHandler extends Handler {
             	scanAreaInPreviewRect.set(0, 0, previewWidth, previewHeight);
             }
             if(barcodeScanner.isRotationBeforeDecodeOfLandscape()){    //如果需要强制旋转90度的话
-                data = RequiredUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight); //旋转源数据
+                data = yuvLandscapeToPortrait(data, previewWidth, previewHeight); //旋转源数据
 
                 /* 旋转坐标区 */
                 int left = scanAreaInPreviewRect.left;
@@ -102,7 +102,7 @@ class DecodeHandler extends Handler {
                 rotateMillis = secondChronograph.count().getIntervalMillis();
             }
         }else{
-            data = RequiredUtils.yuvLandscapeToPortrait(data, previewWidth, previewHeight); //旋转源数据
+            data = yuvLandscapeToPortrait(data, previewWidth, previewHeight); //旋转源数据
 
             /* 旋转宽高 */
             previewWidth = previewWidth + previewHeight;
@@ -172,5 +172,21 @@ class DecodeHandler extends Handler {
 	 */
 	void sendQuitMessage(){
 		obtainMessage(MESSAGE_WHAT_QUIT).sendToTarget();
+	}
+	
+	/**
+	 * 将YUV格式的图片的源数据从横屏模式转为竖屏模式，注意：将源图片的宽高互换一下就是新图片的宽高
+	 * @param sourceData YUV格式的图片的源数据
+	 * @param width 源图片的宽
+	 * @param height 源图片的高
+	 * @return 
+	 */
+	public static byte[] yuvLandscapeToPortrait(byte[] sourceData, int width, int height){
+		byte[] rotatedData = new byte[sourceData.length];
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++)
+				rotatedData[x * height + height - y - 1] = sourceData[x + y * width];
+		}
+		return rotatedData;
 	}
 }

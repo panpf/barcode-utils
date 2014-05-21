@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Barcode Scanner</string>
+    <string name="app_name">Happy Barcode</string>
     
 	<string name="editHint_content">请输入二维码内容</string>    
 

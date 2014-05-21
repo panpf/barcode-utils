@@ -1,10 +1,34 @@
-# ![Logo](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/res/drawable-mdpi/ic_launcher.png) Android-BarcodeScanner
+# ![Logo](https://github.com/xiaopansky/HappyBarcode/raw/master/res/drawable-mdpi/ic_launcher.png) HappyBarcode
 
-这是一个基于Zxing基础上封装的Android条码扫描库，适合快速在项目中集成扫码功能，目前兼容Zxing核心库版本是2.3.0，最低兼容Android2.2
+HappyBarcode是Android上的一个条码解析、生成、扫描库，其基于Zxing封装，适合快速在项目中集成条码相关功能，目前兼容Zxing核心库版本是2.3.0，最低兼容Android2.2
 
 ##Usage Guide
 
-###1.创建BarcodeScanner
+###解码：
+快捷的解码方法都集中在DecodeUtils中，包括decodeFile()、decodeYUV()、decodeBitmap()三种方法，示例如下：
+```java
+Result result = DecodeUtils.decodeFile(new File("/mnt/sdcard/0/qrcode.png"));
+Log.i("条码内容：", result.getText());
+```
+
+###生成码：
+生成主要使用的是BarcodeCreator，示例如下：
+```java
+String qrcodeContent = "http://baidu.com";	// 条码内容
+BarcodeFormat barcodeFormat = BarcodeFormat.QR_CODE;	// 条码类型为二维条码
+int imageWidth = 500;	// 条码宽为500
+int imageHieght = 500;	// 条码高为500
+BarcodeCreator barcodeCreator = new BarcodeCreator(qrcodeContent, barcodeFormat, imageWidth, imageHieght);
+barcodeCreator.setCharset("UTF-8");	// 设置编码方式
+barcodeCreator.setOutFile(new File(Environment.getExternalStorageDirectory().getPath() + File.separator + getPackageName() + File.separator + System.currentTimeMillis() + ".jpeg"));	// 设置将生成的条码保存到文件
+barcodeCreator.setOutCompressFormat(CompressFormat.JPEG);	// 设置输出压缩格式
+barcodeCreator.setOutCompressQuality(100);	// 设置输出压缩比例
+Bitmap barcodeBitmap = barcodeCreator.create(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher, null));	// 生成条码，并且在条码中间绘制当前应用的logo
+```
+
+###使用相机扫码：
+
+####1.创建BarcodeScanner
 在onCreate()方法中创建BarcodeScanner，例如：
 ```java
 //创建一个支持所有格式，编码方式为"UTF-8"并且默认扫描区域为全屏的条码扫描器
@@ -13,7 +37,7 @@ barcodeScanner.setDebugMode(true);
 ```
 如果你想自定义扫描格式等信息，可使用其它构造函数
 
-###2.设置Camera和扫描区域
+####2.设置Camera和扫描区域
 在你打开Camera以后调用setCamera()方法设置Camera，例如：
 ```java
 Camera camera = Camera.open();
@@ -31,7 +55,7 @@ camera.startPreview();
 barcodeScanner.start();
 ```
 
-###3.处理回调事件
+####4.处理回调事件
 ```java
 private class MyBarcodeScanCallback implements BarcodeScanCallback{
 	@Override
@@ -54,13 +78,13 @@ private class MyBarcodeScanCallback implements BarcodeScanCallback{
 }
 ```
 
-###4.停止扫描
+####5.停止扫描
 在需要停止解码的时候调用barcodeScanner.stop()即可停止扫描，例如：
 ```java
 barcodeScanner.stop();
 ```
 
-###5.释放BarcodeScanner
+####6.释放BarcodeScanner
 在需要释放的时候调用barcodeScanner.release()方法即可释放，一般情况下建议重写Activity的onDestroy()方法，在onDestroy()方法内部释放BarcodeScanner
 注意：当已经释放了之后再去调用start()方法则会抛出IllegalStateException异常
 ```java
@@ -77,12 +101,12 @@ protected void onDestroy() {
 完整使用示例请参考BarcodeScanActivity.java
 
 ##Downloads
-**[android-barcode-scanner-1.2.2.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.2.jar)**
+**[android-happy-barcode-1.3.0.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/releases/android-happy-barcode-1.3.0.jar)**
 
-**[android-barcode-scanner-1.2.2-with-src.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/releases/android-barcode-scanner-1.2.2-with-src.jar)**
+**[android-happy-barcode-1.3.0-with-src.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/releases/android-happy-barcode-1.3.0-with-src.jar)**
 
 ##Depend
->* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/Android-BarcodeScanner/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
+>* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
 
 ##Change Log
 
@@ -122,7 +146,7 @@ protected void onDestroy() {
 >* Decoder.java改名为BarcodeDecoder.java；
 >* 优化了解码线程的实现方式使之更加稳定、节省内存，解码性能大幅提升；
 >* 将ResultPointCallback的回调移到了DecodeListener中，使用更方便；
->* Android-BarcodeScanner不再依赖于EasyAndroid核心库。
+>* HappyBarcode不再依赖于EasyAndroid核心库。
 
 ##License
 ```java

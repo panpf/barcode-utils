@@ -1,9 +1,9 @@
-package me.xiaopan.android.barcodescanner.sample;
+package me.xiaopan.android.happybarcode.sample;
 
 import java.io.File;
 
-import me.xiaopan.android.barcodescanner.EncodeUtils;
-import me.xiaopan.android.barcodescanner.R;
+import me.xiaopan.android.happybarcode.BarcodeCreator;
+import me.xiaopan.android.happybarcode.R;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -39,7 +39,9 @@ public class BarcodeGenerateActivity extends Activity{
 				String content = contentEdit.getEditableText().toString().trim();
 				if(!TextUtils.isEmpty(content)){
 					try {
-						qrcodeImage.setImageBitmap(EncodeUtils.encode(content, BarcodeFormat.QR_CODE, null, 500, 500, null, BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher, null), new File(new File(Environment.getExternalStorageDirectory().getPath() + File.separator + getPackageName()).getPath() + File.separator + System.currentTimeMillis() + ".jpeg")));
+						BarcodeCreator barcodeCreator = new BarcodeCreator(content, BarcodeFormat.QR_CODE, 500, 500);
+						barcodeCreator.setOutFile(new File(Environment.getExternalStorageDirectory().getPath() + File.separator + getPackageName() + File.separator + System.currentTimeMillis() + ".jpeg"));
+						qrcodeImage.setImageBitmap(barcodeCreator.create(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher, null)));
 					} catch (Exception e) {
 						e.printStackTrace();
 						Toast.makeText(getBaseContext(), "生成失败", Toast.LENGTH_SHORT).show();
