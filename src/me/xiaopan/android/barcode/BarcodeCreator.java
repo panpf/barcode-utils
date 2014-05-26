@@ -1,4 +1,4 @@
-package me.xiaopan.android.happybarcode;
+package me.xiaopan.android.barcode;
 
 import java.io.File;
 import java.io.FileOutputStream;

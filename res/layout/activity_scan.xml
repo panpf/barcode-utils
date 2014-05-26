@@ -40,7 +40,7 @@
         <!-- 扫描框区 -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1.2">
             <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="2" android:background="#70000000"/>
-            <me.xiaopan.android.happybarcode.widget.ScanAreaView
+            <me.xiaopan.android.barcode.widget.ScanAreaView
                 android:id="@+id/scannArea_decode"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

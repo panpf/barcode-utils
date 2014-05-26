@@ -101,14 +101,17 @@ protected void onDestroy() {
 完整使用示例请参考BarcodeScanActivity.java
 
 ##Downloads
->* **[android-happy-barcode-1.3.0.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/releases/android-happy-barcode-1.3.0.jar)**
+>* **[android-happy-barcode-1.3.1.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/releases/android-happy-barcode-1.3.1.jar)**
 
->* **[android-happy-barcode-1.3.0-with-src.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/releases/android-happy-barcode-1.3.0-with-src.jar)**
+>* **[android-happy-barcode-1.3.1-with-src.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/releases/android-happy-barcode-1.3.1-with-src.jar)**
 
 Dependencies
 >* **[zxing-core-2.3.0.jar](https://github.com/xiaopansky/HappyBarcode/raw/master/libs/zxing-core-2.3.0.jar)** Required. 条码识别的核心库
 
 ##Change Log
+
+###1.3.1
+>* 包名从me.xiaopan.android.happybarcode改为me.xiaopan.android.barcode
 
 ###1.2.2
 >* 优化扫描回调逻辑

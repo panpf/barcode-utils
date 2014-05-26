@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package me.xiaopan.android.happybarcode;
+package me.xiaopan.android.barcode;
 
-import me.xiaopan.android.happybarcode.BarcodeScanner.BarcodeScanCallback;
+import me.xiaopan.android.barcode.BarcodeScanner.BarcodeScanCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;

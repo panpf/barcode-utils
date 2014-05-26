@@ -1,9 +1,9 @@
-package me.xiaopan.android.happybarcode.sample;
+package me.xiaopan.android.barcode.sample;
 
 import java.io.File;
 
-import me.xiaopan.android.happybarcode.BarcodeCreator;
-import me.xiaopan.android.happybarcode.R;
+import me.xiaopan.android.barcode.BarcodeCreator;
+import me.xiaopan.android.barcode.R;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xiaopan.android.happybarcode.widget;
+package me.xiaopan.android.barcode.widget;
 
 import java.util.ArrayList;
 import java.util.List;

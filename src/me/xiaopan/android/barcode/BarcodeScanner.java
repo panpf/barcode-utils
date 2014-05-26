@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xiaopan.android.happybarcode;
+package me.xiaopan.android.barcode;
 
 import java.util.EnumMap;
 import java.util.Map;

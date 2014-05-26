@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.xiaopan.android.happybarcode;
+package me.xiaopan.android.barcode;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;

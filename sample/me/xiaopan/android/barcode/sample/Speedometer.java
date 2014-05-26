@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Peng fei Pan <sky@xiaopan.me>
+ * Copyright 2013 Peng fei Pan
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-package me.xiaopan.android.happybarcode;
+package me.xiaopan.android.barcode.sample;
 
-/**
- * 条码格式组
- */
-public enum BarcodeFormatGroup {
-	/**
-	 * 产品码
-	 */
-	PRODUCT_FORMATS, 
+public class Speedometer {
+	private int count;
+	private long lastCountTime;
 	
 	/**
-	 * 一维码
+	 * 计数
 	 */
-	ONE_D_FORMATS, 
+	public void count(){
+		count(1);
+	}
 	
 	/**
-	 * 二维码
+	 * 计数
+	 * @param number 本次增加个数
 	 */
-	QR_CODE_FORMATS,
+	public void count(int number){
+		long currentTime = System.currentTimeMillis();
+		if(currentTime - lastCountTime > 1000){
+			count = 0;
+			lastCountTime = currentTime;
+		}
+		count += number;
+	}
 	
-	/**
-	 * 数据码
-	 */
-	DATA_MATRIX_FORMATS,
+	public int computePerSecondSpeed(){
+		return count;
+	}
 }
