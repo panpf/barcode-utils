@@ -230,9 +230,6 @@ public class BarcodeCreator {
 		if(outFile == null){
 			throw new IllegalArgumentException("outFile不能为null");
 		}
-		if(!outFile.isFile()){
-			throw new IllegalArgumentException(outFile.getPath()+"（outFile不是文件）");
-		}
 		this.outFile = outFile;
 		return this;
 	}
