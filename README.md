@@ -1,3 +1,5 @@
+# 停止维护，仅供参考
+
 # ![Logo][logo_image] BarcodeUtils
 
 ![Platform][platform_image]
